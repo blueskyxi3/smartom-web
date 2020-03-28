@@ -182,6 +182,7 @@
           v-if="columns.visible('name')"
           label="Name"
           prop="name"
+          width="330"
         >
           <template slot-scope="scope">
             <span v-if="scope.row.type ==0 ">{{ scope.row.name }}</span>
@@ -201,6 +202,7 @@
           prop="content"
           label="content"
           :show-overflow-tooltip="true"
+          width="300"
         />
         <!--  <el-table-column v-if="columns.visible('status')" prop="status" label="status">
           <template slot-scope="scope">
