@@ -63,14 +63,14 @@
             type="warning"
             icon="el-icon-download"
             @click="$_doExport"
-          >导出1</el-button>
-             <el-button
+          >导出</el-button>
+          <el-button
             class="filter-item"
             size="mini"
             type="success"
             icon="el-icon-s-promotion"
             @click="$_doSend"
-          >发送1</el-button>
+          >发送</el-button>
         </span>
       </div>
       <!--表格渲染-->
@@ -81,22 +81,35 @@
         style="width: 100%;"
         @selection-change="$_selectionChangeHandler"
       >
-        <el-table-column type="selection" width="55"></el-table-column>
+        <el-table-column
+          type="selection"
+          width="55"
+        />
         <el-table-column
           v-for="(item,index) in columns"
+          :key="index"
           :prop="item"
           :label="item"
-          :key="index"
           :show-overflow-tooltip="true"
-        ></el-table-column>
-        <el-table-column v-if="isHaveCreateTime" prop="create_time" label="create_time" width="180">
+        />
+        <el-table-column
+          v-if="isHaveCreateTime"
+          prop="create_time"
+          label="create_time"
+          width="180"
+        >
           <template slot-scope="scope">
-            <span>{{scope.row.create_time|parseTime}}</span>
+            <span>{{ scope.row.create_time|parseTime }}</span>
           </template>
         </el-table-column>
-         <el-table-column v-if="isHaveUpdateTime" prop="create_time" label="create_time" width="180">
+        <el-table-column
+          v-if="isHaveUpdateTime"
+          prop="create_time"
+          label="create_time"
+          width="180"
+        >
           <template slot-scope="scope">
-            <span>{{scope.row.update_time|parseTime}}</span>
+            <span>{{ scope.row.update_time|parseTime }}</span>
           </template>
         </el-table-column>
       </el-table>
@@ -117,20 +130,30 @@
 
 <script>
 import crudReport from '@/api/report/report'
-import crudResult from "@/api/etlResult";
-import crudEtlRule from "@/api/etlRule";
-import { parseTime, downloadFile } from "@/utils/index";
+import { parseTime, downloadFile } from '@/utils/index'
 
 export default {
-  name: "EtlResult",
-  dicts: ["etl_status", "etl_type"],
+  name: 'EtlResult',
+  dicts: ['etl_status', 'etl_type'],
+  filters: {
+    parseTime(value) {
+      return parseTime(value)
+    },
+    transferStatus(value) {
+      if (value === 0) return '未开始'
+      if (value === 1) return '成功'
+      if (value === 2) return '失败'
+      if (value === 3) return '处理中'
+      return '异常数据'
+    }
+  },
   data() {
     return {
-      reportId:-1,
+      reportId: -1,
       permission: {
-        add: ["admin", "etlRule:add"],
-        edit: ["admin", "etlRule:edit"],
-        del: ["admin", "etlRule:del"]
+        add: ['admin', 'etlRule:add'],
+        edit: ['admin', 'etlRule:edit'],
+        del: ['admin', 'etlRule:del']
       },
       page: {
         // 页码
@@ -140,84 +163,76 @@ export default {
         // 总数据条数
         total: 0
       },
-      sort: ["id,desc"],
-      queryTypeOptions: [{ key: "batch_id", display_name: "文件名" }],
+      sort: ['id,desc'],
+      queryTypeOptions: [{ key: 'batch_id', display_name: '文件名' }],
       databases: [],
       data: [],
       query: {},
       params: {},
       tableHeader: []
-    };
+    }
   },
   computed: {
     columns: function() {
-      let arr = this.tableHeader.filter(function(x) {
-        return  x != "create_time"&&x != "update_time";
-      });
-      return arr;
+      const arr = this.tableHeader.filter(function(x) {
+        return x !== 'create_time' && x !== 'update_time'
+      })
+      return arr
     },
-     isHaveCreateTime: function() {
-      let flag = this.tableHeader.indexOf('create_time') > 0 
-      return flag;
+    isHaveCreateTime: function() {
+      const flag = this.tableHeader.indexOf('create_time') > 0
+      return flag
     },
     isHaveUpdateTime: function() {
-      let flag = this.tableHeader.indexOf('update_time') > 0 
-      return flag;
+      const flag = this.tableHeader.indexOf('update_time') > 0
+      return flag
     }
   },
-  filters: {
-    parseTime(value) {
-      return parseTime(value);
-    },
-    transferStatus(value) {
-      if (value == 0) return "未开始";
-      if (value == 1) return "成功";
-      if (value == 2) return "失败";
-      if (value == 3) return "处理中";
-      return "异常数据";
-    }
+  created() {
+    this.reportId = this.$route.params.reportId
+    this.$_toQuery()
   },
   methods: {
     $_sizeChangeHandler(e) {
-      console.log(`size------>${e}`);
-      this.page.size = e;
-      this.page.page = 1;
-      this.$_refresh();
+      console.log(`size------>${e}`)
+      this.page.size = e
+      this.page.page = 1
+      this.$_refresh()
     },
     $_pageChangeHandler(e) {
-      console.log(`_pageChangeHandler${e}`);
-      this.page.page = e;
-      this.$_refresh();
+      console.log(`_pageChangeHandler${e}`)
+      this.page.page = e
+      this.$_refresh()
     },
     $_resetQuery(toQuery = true) {
-      console.log("resetQuery" + toQuery);
-      //const defaultQuery = JSON.parse(JSON.stringify(crud.defaultQuery))
-      //const query = crud.query
-      //Object.keys(query).forEach(key => {
+      console.log('resetQuery' + toQuery)
+      // const defaultQuery = JSON.parse(JSON.stringify(crud.defaultQuery))
+      // const query = crud.query
+      // Object.keys(query).forEach(key => {
       //  query[key] = defaultQuery[key]
-      //})
-      this.$_toQuery();
+      // })
+      this.$_toQuery()
     },
     $_toQuery() {
-      console.log("_toQuery");
-      this.page.page = 1;
-      this.$_refresh();
+      console.log('_toQuery')
+      this.page.page = 1
+      this.$_refresh()
     },
     $_refresh() {
-     // let _data = this.$_getQueryParams();
+      // let _data = this.$_getQueryParams();
 
-     // console.log("refresh--->" + JSON.stringify(_data));
+      // console.log("refresh--->" + JSON.stringify(_data));
       // console.log(  qs.stringify(_data, { indices: false }))
 
       crudReport.getReport(this.reportId).then(res => {
-        this.data = res.content;
-        this.page.total = res.totalElements;
-        this.tableHeader = res.columns;
-      });
+        this.data = res.content
+        this.page.total = res.totalElements
+        this.tableHeader = res.columns
+      })
     },
     $_getQueryParams: function() {
       if (this.query.type && this.query.value) {
-        this.params[this.query.type] = this.query.value;
+        this.params[this.query.type] = this.query.value
       }
 
       return {
@@ -226,35 +241,28 @@ export default {
         sort: this.sort,
         ...this.query,
         ...this.params
-      };
+      }
     },
     $_doExport() {
-       crudReport.exportReport(this.reportId).then(result => {
+      crudReport.exportReport(this.reportId).then(result => {
         downloadFile(result, '数据', 'xlsx')
-     
       }).catch((res) => {
         console.log(res)
       })
-
     },
     $_doSend() {
-       crudReport.sendReport(this.reportId).then(result => {
+      crudReport.sendReport(this.reportId).then(result => {
         console.log(result)
-        this.$notify({title: '执行成功',type: 'success',duration: 2500})
+        this.$notify({ title: '执行成功', type: 'success', duration: 2500 })
       }).catch((res) => {
         console.log(res)
       })
-
     },
     $_selectionChangeHandler(e) {
-      console.log("selectionChangeHandler--" + e);
+      console.log('selectionChangeHandler--' + e)
     }
-  },
-  created() {
-    this.reportId = this.$route.params.reportId
-    this.$_toQuery();
   }
-};
+}
 </script>
 
 <style scoped>
