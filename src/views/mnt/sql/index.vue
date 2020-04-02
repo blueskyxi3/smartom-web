@@ -29,7 +29,7 @@
         <el-select
           v-model="query.dbId"
           clearable
-          placeholder="数据库"
+          placeholder="服务器"
           class="filter-item"
           style="width: 130px"
         >
@@ -61,7 +61,7 @@
         >
           <el-form-item
             v-if="crud.status.edit"
-            label="编码"
+            label="序号"
           >
             <el-input
               v-model="form.id"
@@ -70,7 +70,7 @@
             />
           </el-form-item>
           <el-form-item
-            label="进程名称"
+            label="监控项"
             prop="name"
           >
             <el-input
@@ -78,7 +78,7 @@
               style="width: 370px;"
             />
           </el-form-item>
-          <el-form-item label="数据库">
+          <el-form-item label="服务器">
             <el-select
               v-model="form.dbId"
               placeholder="请选择"
@@ -93,7 +93,7 @@
             </el-select>
           </el-form-item>
           <el-form-item
-            label="系统名称"
+            label="系统名"
             prop="serviceName"
           >
             <el-input
@@ -102,7 +102,7 @@
             />
           </el-form-item>
           <el-form-item
-            label="SQL内容"
+            label="命令"
             prop="sqlText"
           >
             <el-input
@@ -113,7 +113,7 @@
             />
           </el-form-item>
           <el-form-item
-            label="规则"
+            label="告警规则"
             prop="rule"
           >
             <el-input
@@ -179,19 +179,13 @@
         <el-table-column
           v-if="columns.visible('id')"
           prop="id"
-          label="编码"
+          label="序号"
           width="100"
-        />
-        <el-table-column
-          v-if="columns.visible('name')"
-          prop="name"
-          label="进程名称"
-          :show-overflow-tooltip="true"
         />
         <el-table-column
           v-if="columns.visible('dbId')"
           prop="dbId"
-          label="数据裤"
+          label="服务器"
           :show-overflow-tooltip="true"
         >
           <template slot-scope="scope">
@@ -206,20 +200,26 @@
         <el-table-column
           v-if="columns.visible('serviceName')"
           prop="serviceName"
-          label="系统名称"
+          label="系统名"
+          :show-overflow-tooltip="true"
+        />
+        <el-table-column
+          v-if="columns.visible('name')"
+          prop="name"
+          label="监控项"
           :show-overflow-tooltip="true"
         />
         <el-table-column
           v-if="columns.visible('sqlText')"
           prop="sqlText"
-          label="SQL内容"
+          label="命令"
           :show-overflow-tooltip="true"
           width="320"
         />
         <el-table-column
           v-if="columns.visible('rule')"
           prop="rule"
-          label="Rule"
+          label="告警规则"
           :show-overflow-tooltip="true"
         />
         <el-table-column
@@ -311,8 +311,8 @@ export default {
         ]
       },
       queryTypeOptions: [
-        { key: 'name', display_name: '进程名称' },
-        { key: 'sqlText', display_name: 'SQL内容' }
+        { key: 'name', display_name: '监控项' },
+        { key: 'sqlText', display_name: '命令' }
       ],
       query: {},
       databases: []
