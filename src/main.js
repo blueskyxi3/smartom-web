@@ -9,6 +9,8 @@ import Element from 'element-ui'
 import mavonEditor from 'mavon-editor'
 import 'mavon-editor/dist/css/index.css'
 
+import VCharts from 'v-charts'
+
 // 数据字典
 import dict from './components/Dict'
 
@@ -30,10 +32,11 @@ import './assets/icons' // icon
 import './router/index' // permission control
 
 import JsonViewer from 'vue-json-viewer'
- 
+
 // Import JsonViewer as a Vue.js plugin
 Vue.use(JsonViewer)
-
+// import e-chart
+Vue.use(VCharts)
 Vue.use(VueHighlightJS)
 Vue.use(mavonEditor)
 Vue.use(permission)

@@ -1,46 +1,101 @@
 <template>
-  <el-row :gutter="40" class="panel-group">
-    <el-col :xs="12" :sm="12" :lg="6" class="card-panel-col">
+  <el-row
+    :gutter="40"
+    class="panel-group"
+  >
+    <el-col
+      :xs="12"
+      :sm="12"
+      :lg="6"
+      class="card-panel-col"
+    >
       <div class="card-panel">
         <div class="card-panel-icon-wrapper icon-people">
-          <svg-icon icon-class="visits" class-name="card-panel-icon" />
+          <svg-icon
+            icon-class="sms"
+            class-name="card-panel-icon"
+          />
         </div>
         <div class="card-panel-description">
-          <div class="card-panel-text">日流量</div>
-          <count-to :start-val="0" :end-val="count.newVisits" :duration="2600" class="card-panel-num" />
+          <div class="card-panel-text">SMS</div>
+          <count-to
+            :start-val="0"
+            :end-val="count.newVisits"
+            :duration="2600"
+            class="card-panel-num"
+          />
         </div>
       </div>
     </el-col>
-    <el-col :xs="12" :sm="12" :lg="6" class="card-panel-col">
+    <el-col
+      :xs="12"
+      :sm="12"
+      :lg="6"
+      class="card-panel-col"
+    >
       <div class="card-panel">
         <div class="card-panel-icon-wrapper icon-message">
-          <svg-icon icon-class="ipvisits" class-name="card-panel-icon" />
+          <svg-icon
+            icon-class="voice"
+            class-name="card-panel-icon"
+          />
         </div>
         <div class="card-panel-description">
-          <div class="card-panel-text">日IP量</div>
-          <count-to :start-val="0" :end-val="count.newIp" :duration="3000" class="card-panel-num" />
+          <div class="card-panel-text">VOICE</div>
+          <count-to
+            :start-val="0"
+            :end-val="count.newIp"
+            :duration="3000"
+            class="card-panel-num"
+          />
         </div>
       </div>
     </el-col>
-    <el-col :xs="12" :sm="12" :lg="6" class="card-panel-col">
+    <el-col
+      :xs="12"
+      :sm="12"
+      :lg="6"
+      class="card-panel-col"
+    >
       <div class="card-panel">
         <div class="card-panel-icon-wrapper icon-money">
-          <svg-icon icon-class="visits" class-name="card-panel-icon" />
+          <svg-icon
+            icon-class="mobile"
+            class-name="card-panel-icon"
+          />
         </div>
         <div class="card-panel-description">
-          <div class="card-panel-text">周流量</div>
-          <count-to :start-val="0" :end-val="count.recentVisits" :duration="3200" class="card-panel-num" />
+          <div class="card-panel-text">MOBILE</div>
+          <count-to
+            :start-val="0"
+            :end-val="count.recentVisits"
+            :duration="3200"
+            class="card-panel-num"
+          />
         </div>
       </div>
     </el-col>
-    <el-col :xs="12" :sm="12" :lg="6" class="card-panel-col">
+    <el-col
+      :xs="12"
+      :sm="12"
+      :lg="6"
+      class="card-panel-col"
+    >
       <div class="card-panel">
         <div class="card-panel-icon-wrapper icon-shopping">
-          <svg-icon icon-class="ipvisits" class-name="card-panel-icon" />
+          <svg-icon
+            icon-class="retail"
+            class-name="card-panel-icon"
+          />
         </div>
         <div class="card-panel-description">
-          <div class="card-panel-text">周IP量</div>
-          <count-to :start-val="0" :end-val="count.recentIp" :duration="3600" class="card-panel-num" />
+          <div class="card-panel-text">RETAIL</div>
+          <count-to
+            :start-val="0"
+            :end-val="count.recentIp"
+            :duration="3600"
+            class="card-panel-num"
+          />
         </div>
       </div>
     </el-col>
@@ -73,7 +128,7 @@ export default {
 <style rel="stylesheet/scss" lang="scss" scoped>
 .panel-group {
   margin-top: 18px;
-  .card-panel-col{
+  .card-panel-col {
     margin-bottom: 32px;
   }
   .card-panel {
@@ -83,8 +138,8 @@ export default {
     overflow: hidden;
     color: #666;
     background: #fff;
-    box-shadow: 4px 4px 40px rgba(0, 0, 0, .05);
-    border-color: rgba(0, 0, 0, .05);
+    box-shadow: 4px 4px 40px rgba(0, 0, 0, 0.05);
+    border-color: rgba(0, 0, 0, 0.05);
     .icon-people {
       color: #40c9c6;
     }
@@ -95,7 +150,7 @@ export default {
       color: #f4516c;
     }
     .icon-shopping {
-      color: #34bfa3
+      color: #34bfa3;
     }
     .card-panel-icon-wrapper {
       float: left;
