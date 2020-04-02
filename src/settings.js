@@ -2,7 +2,7 @@ module.exports = {
   /**
    * @description 网站标题
    */
-  title: 'SMART OS',
+  title: 'SMART OM',
   /**
    * @description 是否显示 tagsView
    */

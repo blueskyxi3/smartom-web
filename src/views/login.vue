@@ -207,8 +207,9 @@ export default {
   height: 100%;
   // background-color: rgb(87, 107, 163);
   //background-image: url(https://api.isoyu.com/bing_images.php);
-  background-image: url("../assets/images/bg.jpg");
+  background-image: url("../assets/images/bg.png");
   background-size: cover;
+  background-color: #F7F7F7;
 }
 .title {
   margin: 0 auto 30px auto;
