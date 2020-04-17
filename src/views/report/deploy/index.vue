@@ -134,6 +134,14 @@
                 :value="item.value"
               />
             </el-select>
+            <el-button
+              size="mini"
+              style="margin-right: 2px"
+              type="text"
+              @click="$_openMsgTemplate"
+            >
+              新建消息模板
+            </el-button>
           </el-form-item>
           <el-form-item
             label="上级类目"
@@ -227,11 +235,16 @@
         <el-table-column
           v-if="columns.visible('msgId')"
           prop="msgId"
-          label="消息模板ID"
+          label="消息模板"
           :show-overflow-tooltip="true"
         >
           <template slot-scope="scope">
-            {{ scope.row.msgId }}
+            <template v-for="item in msgTemplate">
+              <span
+                v-if="item.value == scope.row.msgId"
+                :key="item.value"
+              >{{ item.label }}</span>
+            </template>
           </template>
         </el-table-column>
         <el-table-column
@@ -271,6 +284,7 @@
 </template>
 
 <script>
+import router from '@/router/routers'
 import crudMsgTemplate from '@/api/msgTemplate'
 import crudDatabase from '@/api/mnt/database'
 import crudReport from '@/api/report/report'
@@ -302,7 +316,7 @@ const defaultForm = {
   createTime: null
 }
 export default {
-  name: 'Report',
+  name: 'Reportdeploy',
   components: {
     Treeselect,
     pagination,
@@ -347,13 +361,17 @@ export default {
     crudMsgTemplate.query().then(res => {
       const res1 = res.content
       this.msgTemplate = res1.map(item => {
-        return { value: `${item.id}`, label: `${item.name}` }
+        return { value: Number(`${item.id}`), label: `${item.name}` }
       })
       this.options = this.msgTemplate
     })
   },
 
   methods: {
+    $_openMsgTemplate() {
+      this.crud.status.edit = 0
+      router.push({ path: '/msg/template' })
+    },
     remoteMethod(query) {
       if (query !== '') {
         setTimeout(() => {

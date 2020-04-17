@@ -8,6 +8,10 @@ export function getMenusTree() {
 }
 
 export function add(data) {
+  debugger
+  if (data.type === '0') {
+    data.db_id = ''
+  }
   return request({
     url: 'api/report',
     method: 'post',
@@ -33,13 +37,13 @@ export function edit(data) {
 
 export function getReport(id) {
   return request({
-    url: 'api/report/display/'+id,
+    url: 'api/report/display/' + id,
     method: 'get'
   })
 }
 export function exportReport(id) {
   return request({
-    url: 'api/report/export/'+id,
+    url: 'api/report/export/' + id,
     method: 'get',
     responseType: 'blob'
   })
@@ -47,8 +51,8 @@ export function exportReport(id) {
 
 export function sendReport(id) {
   return request({
-    url: 'api/report/send/'+id,
+    url: 'api/report/send/' + id,
     method: 'get'
   })
 }
-export default { add, edit, del ,getMenusTree,getReport,exportReport,sendReport}
+export default { add, edit, del, getMenusTree, getReport, exportReport, sendReport }

@@ -291,7 +291,7 @@ import pagination from '@crud/Pagination'
 const defaultCrud = CRUD({ title: 'SQL', url: 'api/sql', sort: 'id,desc', crudMethod: { ...crudSql }})
 const defaultForm = { id: null, name: null, dbId: null, sqlText: null, rule: null, createTime: null, remark: null }
 export default {
-  name: 'Sql',
+  name: 'SqlM',
   components: { pagination, crudOperation, rrOperation, udOperation },
   mixins: [presenter(defaultCrud), header(), form(defaultForm), crud()],
   dicts: ['user_status', 'alert_code'],
