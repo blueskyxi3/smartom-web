@@ -2,42 +2,43 @@
   <div class="app-container">
     <!--工具栏-->
     <div class="head-container">
-      <!--
+
       <div>
-        <el-input
-          v-model="query.value"
-          clearable
-          placeholder="输入搜索内容"
-          style="width: 200px;"
-          class="filter-item"
-          @keyup.enter.native="$_toQuery"
-        />
-        <el-select
-          v-model="query.type"
-          clearable
-          placeholder="类型"
-          class="filter-item"
-          style="width: 130px"
+        <div style="margin-left:50px">
+
+          <div
+            v-for="(cond,index) in conds"
+            :key="index"
+          >
+            <span v-if="cond.ptype==0">{{ cond.pvalue }}:</span>
+            <el-input
+              v-if="cond.ptype==0"
+              v-model="qry[cond.pvalue]"
+              placeholder="请输入内容"
+              style="width: 200px;margin-right:30px"
+            />
+          </div>
+
+          <div
+            v-for="(cond,index) in conds"
+            :key="index"
+          >
+            <span v-if="cond.ptype==1">{{ cond.pvalue }}:</span>
+            <el-date-picker
+              v-if="cond.ptype==1"
+              v-model="qry[cond.pvalue]"
+              default-time="00:00:00"
+              type="datetime"
+              style="width: 200px;;margin-right:30px"
+              value-format="yyyy-MM-dd HH:mm:ss"
+              placeholder="日期"
+            />
+          </div>
+        </div>
+        <div
+          v-if="conds.length>0"
+          style="float:right;margin-top:8px;margin-right:150px"
         >
-          <el-option
-            v-for="item in queryTypeOptions"
-            :key="item.key"
-            :label="item.display_name"
-            :value="item.key"
-          />
-        </el-select>
-        <el-date-picker
-          v-model="query.createTime"
-          :default-time="['00:00:00','23:59:59']"
-          type="daterange"
-          range-separator=":"
-          size="small"
-          class="date-item"
-          value-format="yyyy-MM-dd HH:mm:ss"
-          start-placeholder="开始日期"
-          end-placeholder="结束日期"
-        />
-        <span>
           <el-button
             class="filter-item"
             size="mini"
@@ -52,10 +53,13 @@
             icon="el-icon-refresh-left"
             @click="$_resetQuery()"
           >重置</el-button>
-        </span>
+        </div>
       </div>
--->
-      <div class="crud-opts">
+
+      <div
+        v-if="data.length>0"
+        class="crud-opts"
+      >
         <span class="crud-opts-left">
           <el-button
             class="filter-item"
@@ -75,6 +79,7 @@
       </div>
       <!--表格渲染-->
       <el-table
+        v-if="data.length>0"
         ref="table"
         :data="data"
         size="small"
@@ -133,7 +138,7 @@ import crudReport from '@/api/report/report'
 import { parseTime, downloadFile } from '@/utils/index'
 
 export default {
-  name: 'EtlResult',
+  name: 'Display',
   dicts: ['etl_status', 'etl_type'],
   filters: {
     parseTime(value) {
@@ -164,12 +169,12 @@ export default {
         total: 0
       },
       sort: ['id,desc'],
-      queryTypeOptions: [{ key: 'batch_id', display_name: '文件名' }],
       databases: [],
       data: [],
-      query: {},
+      qry: {},
       params: {},
-      tableHeader: []
+      tableHeader: [],
+      conds: []
     }
   },
   computed: {
@@ -189,8 +194,18 @@ export default {
     }
   },
   created() {
-    this.reportId = this.$route.params.reportId
-    this.$_toQuery()
+    this.reportId = this.$route.params.id
+    // this.reportId = this.$route.query.id
+    console.log(this.$route.params)
+    this.conds = JSON.parse(this.$route.params.conditions)
+    this.conds.forEach(e => {
+      console.log(JSON.stringify(e))
+      if (e.ptype === 1) this.$set(this.qry, e.pvalue, '')
+      else { this.$set(this.qry, e.pvalue, e.dvalue) }
+      // Object.assign(this.qry, { e.pvalue: e.dvalue })
+    })
+    // console.log(conds)
+    if (this.conds <= 0) this.$_toQuery()
   },
   methods: {
     $_sizeChangeHandler(e) {
@@ -211,7 +226,7 @@ export default {
       // Object.keys(query).forEach(key => {
       //  query[key] = defaultQuery[key]
       // })
-      this.$_toQuery()
+      // this.$_toQuery()
     },
     $_toQuery() {
       console.log('_toQuery')
@@ -220,11 +235,12 @@ export default {
     },
     $_refresh() {
       // let _data = this.$_getQueryParams();
-
       // console.log("refresh--->" + JSON.stringify(_data));
       // console.log(  qs.stringify(_data, { indices: false }))
-
-      crudReport.getReport(this.reportId).then(res => {
+      debugger
+      const qry = this.qry
+      crudReport.queryReport(this.reportId, qry).then(res => {
+        console.log(res)
         this.data = res.content
         this.page.total = res.totalElements
         this.tableHeader = res.columns

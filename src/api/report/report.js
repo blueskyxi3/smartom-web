@@ -8,10 +8,17 @@ export function getMenusTree() {
 }
 
 export function add(data) {
-  debugger
   if (data.type === '0') {
     data.db_id = ''
   }
+
+  const flag = data.conditionForm.conditions.some(c => {
+    return c.pvalue === null || c.pvalue === undefined || c.pvalue === ''
+  })
+
+  if (flag) Object.assign(data, { conditions: '' })
+  else Object.assign(data, { conditions: JSON.stringify(data.conditionForm.conditions) })
+  delete data.conditionForm
   return request({
     url: 'api/report',
     method: 'post',
@@ -28,13 +35,27 @@ export function del(ids) {
 }
 
 export function edit(data) {
+  const flag = data.conditionForm.conditions.some(c => {
+    return c.pvalue === null || c.pvalue === undefined || c.pvalue === ''
+  })
+
+  if (flag) Object.assign(data, { conditions: '' })
+  else Object.assign(data, { conditions: JSON.stringify(data.conditionForm.conditions) })
+  delete data.conditionForm
+
   return request({
     url: 'api/report',
     method: 'put',
     data
   })
 }
-
+export function queryReport(id, params) {
+  return request({
+    url: 'api/report/query/' + id,
+    method: 'get',
+    params
+  })
+}
 export function getReport(id) {
   return request({
     url: 'api/report/display/' + id,
@@ -55,4 +76,4 @@ export function sendReport(id) {
     method: 'get'
   })
 }
-export default { add, edit, del, getMenusTree, getReport, exportReport, sendReport }
+export default { add, edit, del, getMenusTree, getReport, exportReport, sendReport, queryReport }

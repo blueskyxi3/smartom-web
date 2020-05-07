@@ -37,125 +37,142 @@
         :before-close="crud.cancelCU"
         :visible.sync="crud.status.cu > 0"
         :title="crud.status.title"
-        width="580px"
+        width="550px"
       >
-        <el-form
-          ref="form"
-          :inline="true"
-          :model="form"
-          :rules="rules"
-          size="small"
-          label-width="80px"
+        <el-tabs
+          v-model="activeName"
+          @tab-click="handleClick"
         >
-          <el-form-item
-            v-if="crud.status.edit"
-            label="id"
+          <el-tab-pane
+            label="基本信息"
+            name="first"
           >
-            <el-input
-              v-model="form.id"
-              style="width: 370px;"
-              disabled
-            />
-          </el-form-item>
-          <el-form-item
-            label="类型"
-            prop="type"
-          >
-            <el-radio-group
-              v-model="form.type"
-              size="mini"
-              style="width: 178px"
+            <el-form
+              ref="form"
+              :inline="true"
+              :model="form"
+              :rules="rules"
+              size="small"
+              label-width="80px"
             >
-              <el-radio-button label="0">分类</el-radio-button>
-              <el-radio-button label="1">报表</el-radio-button>
-            </el-radio-group>
-          </el-form-item>
-          <el-form-item
-            label="name"
-            prop="name"
+              <el-form-item
+                v-if="crud.status.edit"
+                label="id"
+              >
+                <el-input
+                  v-model="form.id"
+                  style="width: 370px;"
+                  disabled
+                />
+              </el-form-item>
+              <el-form-item
+                label="类型"
+                prop="type"
+              >
+                <el-radio-group
+                  v-model="form.type"
+                  size="mini"
+                  style="width: 178px"
+                >
+                  <el-radio-button label="0">分类</el-radio-button>
+                  <el-radio-button label="1">报表</el-radio-button>
+                </el-radio-group>
+              </el-form-item>
+              <el-form-item
+                label="上级类目"
+                prop="pid"
+              >
+                <treeselect
+                  v-model="form.pid"
+                  :options="menus"
+                  style="width: 370px;"
+                  placeholder="选择上级类目"
+                  prop="pid"
+                />
+              </el-form-item>
+              <el-form-item
+                label="name"
+                prop="name"
+              >
+                <el-input
+                  v-model="form.name"
+                  style="width: 370px;"
+                />
+              </el-form-item>
+              <el-form-item
+                v-if="form.type == 1"
+                label="content"
+                prop="content"
+              >
+                <el-input
+                  v-model="form.content"
+                  :rows="3"
+                  type="textarea"
+                  style="width: 370px;"
+                />
+              </el-form-item>
+              <el-form-item
+                v-if="form.type == 1"
+                label="数据库"
+                prop="dbId"
+              >
+                <el-select
+                  v-model="form.dbId"
+                  placeholder="请选择"
+                  style="width: 370px"
+                >
+                  <el-option
+                    v-for="item in databases"
+                    :key="item.id"
+                    :value="item.id"
+                    :label="item.name"
+                  />
+                </el-select>
+              </el-form-item>
+
+              <el-form-item
+                v-if="form.type == 1"
+                label="消息模板"
+              >
+                <el-select
+                  v-model="form.msgId"
+                  filterable
+                  remote
+                  reserve-keyword
+                  placeholder="请输入关键词"
+                  :remote-method="remoteMethod"
+                >
+                  <el-option
+                    v-for="item in options"
+                    :key="item.value"
+                    :label="item.label"
+                    :value="item.value"
+                  />
+                </el-select>
+                <el-button
+                  size="mini"
+                  style="margin-right: 2px"
+                  type="text"
+                  @click="$_openMsgTemplate"
+                >
+                  新建消息模板
+                </el-button>
+              </el-form-item>
+            </el-form>
+          </el-tab-pane>
+          <el-tab-pane
+            label="控件信息"
+            name="second"
+            :disabled="form.type!=1"
           >
-            <el-input
-              v-model="form.name"
-              style="width: 370px;"
-            />
-          </el-form-item>
-          <el-form-item
-            v-if="form.type == 1"
-            label="content"
-            prop="content"
-          >
-            <el-input
-              v-model="form.content"
-              :rows="3"
-              type="textarea"
-              style="width: 370px;"
-            />
-          </el-form-item>
-          <el-form-item
-            v-if="form.type == 1"
-            label="数据库"
-            prop="dbId"
-          >
-            <el-select
-              v-model="form.dbId"
-              placeholder="请选择"
-              style="width: 370px"
-            >
-              <el-option
-                v-for="item in databases"
-                :key="item.id"
-                :value="item.id"
-                :label="item.name"
-              />
-            </el-select>
-          </el-form-item>
-          <!-- <el-form-item v-if="crud.status.edit" label="status" >
-             <el-select v-model="form.status" placeholder="请选择" style="width: 370px" disabled>
-               <el-option :value="1" label="有效"  />
-               <el-option :value="0" label="无效"  />
-             </el-select>
-          </el-form-item>-->
-          <el-form-item
-            v-if="form.type == 1"
-            label="消息模板"
-          >
-            <el-select
-              v-model="form.msgId"
-              filterable
-              remote
-              reserve-keyword
-              placeholder="请输入关键词"
-              :remote-method="remoteMethod"
-            >
-              <el-option
-                v-for="item in options"
-                :key="item.value"
-                :label="item.label"
-                :value="item.value"
-              />
-            </el-select>
-            <el-button
-              size="mini"
-              style="margin-right: 2px"
-              type="text"
-              @click="$_openMsgTemplate"
-            >
-              新建消息模板
-            </el-button>
-          </el-form-item>
-          <el-form-item
-            label="上级类目"
-            prop="pid"
-          >
-            <treeselect
-              v-model="form.pid"
-              :options="menus"
-              style="width: 370px;"
-              placeholder="选择上级类目"
-              prop="pid"
-            />
-          </el-form-item>
-        </el-form>
+            <control :condition-form="form.conditionForm" />
+          </el-tab-pane>
+          <!--  <el-tab-pane label="消息配置"
+                       name="third">消息配置</el-tab-pane>
+          <el-tab-pane label="定时任务"
+                       name="fourth">定时任务</el-tab-pane> -->
+        </el-tabs>
+
         <div
           slot="footer"
           class="dialog-footer"
@@ -200,7 +217,9 @@
               style="margin-right: 2px"
               type="text"
             >
-              <router-link :to="'/report/display/' + scope.row.id">{{ scope.row.name }}</router-link>
+              <!-- <router-link :to="'/report/display/' + scope.row.id">{{ scope.row.name }}</router-link> -->
+              <!--<router-link :to="{path: '/report/display',  query: scope.row}">{{ scope.row.name }}</router-link> -->
+              <router-link :to="{name: 'reportdisplay', params: scope.row}">{{ scope.row.name }}</router-link>
             </el-button>
           </template>
         </el-table-column>
@@ -295,6 +314,7 @@ import udOperation from '@crud/UD.operation'
 import pagination from '@crud/Pagination'
 import Treeselect from '@riophae/vue-treeselect'
 import '@riophae/vue-treeselect/dist/vue-treeselect.css'
+import control from './control'
 
 // crud交由presenter持有
 const defaultCrud = CRUD({
@@ -313,7 +333,15 @@ const defaultForm = {
   status: null,
   msgId: null,
   createdBy: null,
-  createTime: null
+  createTime: null,
+  conditions: null,
+  conditionForm: {
+    conditions: [{
+      pvalue: '',
+      dvalue: '',
+      ptype: '0'
+    }]
+  }
 }
 export default {
   name: 'Reportdeploy',
@@ -322,12 +350,14 @@ export default {
     pagination,
     crudOperation,
     rrOperation,
-    udOperation
+    udOperation,
+    control
   },
   mixins: [presenter(defaultCrud), header(), form(defaultForm), crud()],
   dicts: ['status'],
   data() {
     return {
+      activeName: 'first',
       options: [],
       databases: [],
       msgTemplate: [],
@@ -399,6 +429,13 @@ export default {
         menu.children = res
         this.menus.push(menu)
       })
+      const conds = JSON.parse(form.conditions)
+      if (conds) { form.conditionForm['conditions'] = conds } else { form.conditionForm['conditions'] = [] }
+      this.activeName = 'first'
+    },
+    handleClick(tab, event) {
+      console.log(tab, event)
+      console.log(this.form.type)
     }
   }
 }
