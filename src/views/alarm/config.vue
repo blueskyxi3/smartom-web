@@ -56,6 +56,51 @@
           <el-button :loading="crud.cu === 2" type="primary" @click="crud.submitCU">Continue</el-button>
         </div>
       </el-dialog>
+      <el-dialog :close-on-click-modal="false" :visible.sync="config.display" title="Configure Alarm" width="500px">
+        <el-form ref="configForm" :model="config.form" size="small" label-width="160px">
+          <el-form-item prop="alarmDefinitionId" hidden="true">
+            <el-input v-model="config.form.alarmDefinitionId" type="hidden" />
+          </el-form-item>
+          <el-form-item label="1st Level Recipients" prop="firstLevelRecipients">
+            <el-autocomplete
+              class="inline-input"
+              :fetch-suggestions="querySearch"
+              placeholder="Select Recipients"
+              :trigger-on-focus="false"
+              style="width: 140px;"
+              value-key="userName"
+              @select="selectFirstLevelRecipients"
+            />
+          </el-form-item>
+          <el-form-item label="2nd Level Recipients" prop="secondLevelRecipients">
+            <el-autocomplete
+              class="inline-input"
+              :fetch-suggestions="querySearch"
+              placeholder="Select Recipients"
+              :trigger-on-focus="false"
+              style="width: 140px;"
+              value-key="userName"
+              @select="selectSecondLevelRecipients"
+            />
+          </el-form-item>
+          <el-form-item label="3rd Level Recipients" prop="thirdLevelRecipients">
+            <el-autocomplete
+              class="inline-input"
+              :fetch-suggestions="querySearch"
+              placeholder="Select Recipients"
+              :trigger-on-focus="false"
+              style="width: 140px;"
+              value-key="userName"
+              @select="selectThirdLevelRecipients"
+            />
+          </el-form-item>
+          <el-form-item label="Template" />
+        </el-form>
+        <div slot="footer" class="dialog-footer">
+          <el-button type="text">Back</el-button>
+          <el-button type="primary">Done</el-button>
+        </div>
+      </el-dialog>
       <!--表格渲染-->
       <el-table ref="table" v-loading="crud.loading" :data="crud.data" size="small" style="width: 100%;" @selection-change="crud.selectionChangeHandler">
         <el-table-column type="selection" width="55" />
@@ -78,15 +123,18 @@
             <span v-else>Disabled</span>
           </template>
         </el-table-column>
-        <el-table-column v-permission="['admin','alarmDefinition:edit','alarmDefinition:del']" label="Actions" width="150px" align="center">
-          <el-button
-            icon="el-icon-setting"
-            size="mini"
-          />
-          <el-button
-            icon="el-icon-message"
-            size="mini"
-          />
+        <el-table-column v-permission="['admin','alarmDefinition:config','alarmDefinition:test']" label="Actions" width="150px" align="center">
+          <template slot-scope="scope">
+            <el-button
+              icon="el-icon-setting"
+              size="mini"
+              @click="toConfig(scope.row.id)"
+            />
+            <el-button
+              icon="el-icon-message"
+              size="mini"
+            />
+          </template>
         </el-table-column>
       </el-table>
       <!--分页组件-->
@@ -102,6 +150,7 @@ import rrOperation from '@crud/RR.operation'
 import crudOperation from '@crud/CRUD.operation'
 import pagination from '@crud/Pagination'
 import { getByAlarmCode } from '@/api/alarm/alarmDefinition'
+import { loadAllContacts } from '@/api/notification/notificationContact'
 
 // crud交由presenter持有
 const defaultCrud = CRUD({ title: 'alarm', url: 'alarm-api/alarmDefinition', sort: 'id,desc', crudMethod: { ...crudAlarmDefinition }})
@@ -153,8 +202,25 @@ export default {
       queryTypeOptions: [
         { key: 'severity', display_name: 'Severity' },
         { key: 'systemType', display_name: 'System Type' }
-      ]
+      ],
+      config: {
+        display: false,
+        form: {
+          alarmDefinitionId: null,
+          escalations: []
+        }
+      },
+      recipients: []
     }
+  },
+  mounted() {
+    loadAllContacts().then(result => {
+      if (result) {
+        this.recipients = result
+      } else {
+        console.log('No contacts found')
+      }
+    })
   },
   methods: {
     // 获取数据前设置好接口地址
@@ -167,7 +233,75 @@ export default {
     },
     [CRUD.HOOK.afterSubmit]() {
       console.log('Submit complete')
-      debugger
+    },
+    toConfig(alarmDefId) {
+      this.config.form.alarmDefinitionId = alarmDefId
+      this.config.display = true
+    },
+    querySearch(queryString, cb) {
+      var recipients = this.recipients
+      var results = queryString ? recipients.filter(this.createFilter(queryString)) : recipients
+      // callback to return the filtered list
+      cb(results)
+    },
+    createFilter(queryString) {
+      return (recipient) => {
+        return (recipient.userName.toLowerCase().indexOf(queryString.toLowerCase()) === 0)
+      }
+    },
+    selectFirstLevelRecipients(item) {
+      var eList = this.config.form.escalations
+      var e
+      if (eList.length === 0) {
+        e = {
+          escalationLevel: 1,
+          escalationRule: null,
+          escalationValue: null,
+          contacts: []
+        }
+        eList.push(e)
+      } else {
+        e = eList[0]
+      }
+      if (!e.contacts.includes(item)) {
+        e.contacts.push(item)
+      }
+    },
+    selectSecondLevelRecipients(item) {
+      var eList = this.config.form.escalations
+      var e
+      if (eList.length === 1) {
+        e = {
+          escalationLevel: 2,
+          escalationRule: null,
+          escalationValue: null,
+          contacts: []
+        }
+        eList.push(e)
+      } else {
+        e = eList[1]
+      }
+      if (!e.contacts.includes(item)) {
+        e.contacts.push(item)
+      }
+    },
+    selectThirdLevelRecipients(item) {
+      var eList = this.config.form.escalations
+      var e
+      if (eList.length === 2) {
+        e = {
+          escalationLevel: 3,
+          escalationRule: null,
+          escalationValue: null,
+          contacts: []
+        }
+        eList.push(e)
+      } else {
+        e = eList[2]
+      }
+      if (!e.contacts.includes(item)) {
+        e.contacts.push(item)
+      }
     }
   }
 }
