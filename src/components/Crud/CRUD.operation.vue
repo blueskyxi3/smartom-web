@@ -12,7 +12,7 @@
         icon="el-icon-plus"
         @click="crud.toAdd"
       >
-        新增
+        Add
       </el-button>
       <el-button
         v-if="crud.optShow.edit"
@@ -24,7 +24,7 @@
         :disabled="crud.selections.length !== 1"
         @click="crud.toEdit(crud.selections[0])"
       >
-        修改
+        Edit
       </el-button>
       <el-button
         v-if="crud.optShow.del"
@@ -38,7 +38,7 @@
         :disabled="crud.selections.length === 0"
         @click="toDelete(crud.selections)"
       >
-        删除
+        Delete
       </el-button>
       <el-button
         v-if="crud.optShow.download"
@@ -49,7 +49,7 @@
         type="warning"
         icon="el-icon-download"
         @click="crud.doExport"
-      >导出</el-button>
+      >Export</el-button>
       <!--右侧-->
       <slot name="right" />
     </span>
@@ -86,7 +86,7 @@
           :indeterminate="allColumnsSelectedIndeterminate"
           @change="handleCheckAllChange"
         >
-          全选
+          Select All
         </el-checkbox>
         <el-checkbox
           v-for="item in crud.props.tableColumns"

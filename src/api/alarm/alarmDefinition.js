@@ -24,4 +24,14 @@ export function edit(data) {
   })
 }
 
+export function getByAlarmCode(masterCode, subCode) {
+  if (!(masterCode === '' || masterCode === undefined || masterCode == null ||
+        subCode === '' || subCode === undefined || subCode == null)) {
+    return request({
+      url: 'alarm-api/alarmDefinition/' + masterCode + '/' + subCode,
+      method: 'get'
+    })
+  }
+}
+
 export default { add, edit, del }
