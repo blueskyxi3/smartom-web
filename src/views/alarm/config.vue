@@ -56,43 +56,19 @@
           <el-button :loading="crud.cu === 2" type="primary" @click="crud.submitCU">Continue</el-button>
         </div>
       </el-dialog>
-      <el-dialog :close-on-click-modal="false" :visible.sync="config.display" title="Configure Alarm" width="500px">
+      <el-dialog :close-on-click-modal="false" :visible.sync="config.display" title="Configure Alarm" width="600px">
         <el-form ref="configForm" :model="config.form" size="small" label-width="160px">
           <el-form-item prop="alarmDefinitionId" hidden="true">
             <el-input v-model="config.form.alarmDefinitionId" type="hidden" />
           </el-form-item>
           <el-form-item label="1st Level Recipients" prop="firstLevelRecipients">
-            <el-autocomplete
-              class="inline-input"
-              :fetch-suggestions="querySearch"
-              placeholder="Select Recipients"
-              :trigger-on-focus="false"
-              style="width: 140px;"
-              value-key="userName"
-              @select="selectFirstLevelRecipients"
-            />
+            <ContactPicker :escalation="config.form.escalations[0]" :recipients="recipients" />
           </el-form-item>
           <el-form-item label="2nd Level Recipients" prop="secondLevelRecipients">
-            <el-autocomplete
-              class="inline-input"
-              :fetch-suggestions="querySearch"
-              placeholder="Select Recipients"
-              :trigger-on-focus="false"
-              style="width: 140px;"
-              value-key="userName"
-              @select="selectSecondLevelRecipients"
-            />
+            <ContactPicker :escalation="config.form.escalations[1]" :recipients="recipients" />
           </el-form-item>
           <el-form-item label="3rd Level Recipients" prop="thirdLevelRecipients">
-            <el-autocomplete
-              class="inline-input"
-              :fetch-suggestions="querySearch"
-              placeholder="Select Recipients"
-              :trigger-on-focus="false"
-              style="width: 140px;"
-              value-key="userName"
-              @select="selectThirdLevelRecipients"
-            />
+            <ContactPicker :escalation="config.form.escalations[2]" :recipients="recipients" />
           </el-form-item>
           <el-form-item label="Template" />
         </el-form>
@@ -139,27 +115,27 @@
       </el-table>
       <!--分页组件-->
       <pagination />
-    </div>
+    </div>recipients
   </div>
 </template>
 
 <script>
-import crudAlarmDefinition from '@/api/alarm/alarmDefinition'
+import crudAlarmDefinition, { getByAlarmCode } from '@/api/alarm/alarmDefinition'
 import CRUD, { presenter, header, form, crud } from '@crud/crud'
 import rrOperation from '@crud/RR.operation'
 import crudOperation from '@crud/CRUD.operation'
 import pagination from '@crud/Pagination'
-import { getByAlarmCode } from '@/api/alarm/alarmDefinition'
 import { loadAllContacts } from '@/api/notification/notificationContact'
+import ContactPicker from './components/ContactPicker'
 
 // crud交由presenter持有
 const defaultCrud = CRUD({ title: 'alarm', url: 'alarm-api/alarmDefinition', sort: 'id,desc', crudMethod: { ...crudAlarmDefinition }})
 const defaultForm = { id: null, masterCode: null, subCode: null, alarmSubject: null, severity: null, systemType: null, alarmTemplateId: null, isEnabled: null, autoClearTime: null }
 export default {
   name: 'AlarmDefinition',
-  components: { pagination, crudOperation, rrOperation },
+  components: { pagination, crudOperation, rrOperation, ContactPicker },
   mixins: [presenter(defaultCrud), header(), form(defaultForm), crud()],
-  dicts: ['alarm_severity', 'system_type'],
+  dicts: ['alarm_severity', 'system_type', 'escalation_rule'],
   data() {
     const validateAlarmCode = (rule, value, callback) => {
       if (value === 0 || value === '' || value === undefined || value == null) {
@@ -207,7 +183,27 @@ export default {
         display: false,
         form: {
           alarmDefinitionId: null,
-          escalations: []
+          // Initialize 3 escalation levels
+          escalations: [
+            {
+              escalationLevel: 1,
+              escalationRule: null,
+              escalationValue: null,
+              contacts: []
+            },
+            {
+              escalationLevel: 2,
+              escalationRule: null,
+              escalationValue: null,
+              contacts: []
+            },
+            {
+              escalationLevel: 3,
+              escalationRule: null,
+              escalationValue: null,
+              contacts: []
+            }
+          ]
         }
       },
       recipients: []
@@ -237,76 +233,8 @@ export default {
     toConfig(alarmDefId) {
       this.config.form.alarmDefinitionId = alarmDefId
       this.config.display = true
-    },
-    querySearch(queryString, cb) {
-      var recipients = this.recipients
-      var results = queryString ? recipients.filter(this.createFilter(queryString)) : recipients
-      // callback to return the filtered list
-      cb(results)
-    },
-    createFilter(queryString) {
-      return (recipient) => {
-        return (recipient.userName.toLowerCase().indexOf(queryString.toLowerCase()) === 0)
-      }
-    },
-    selectFirstLevelRecipients(item) {
-      var eList = this.config.form.escalations
-      var e
-      if (eList.length === 0) {
-        e = {
-          escalationLevel: 1,
-          escalationRule: null,
-          escalationValue: null,
-          contacts: []
-        }
-        eList.push(e)
-      } else {
-        e = eList[0]
-      }
-      if (!e.contacts.includes(item)) {
-        e.contacts.push(item)
-      }
-    },
-    selectSecondLevelRecipients(item) {
-      var eList = this.config.form.escalations
-      var e
-      if (eList.length === 1) {
-        e = {
-          escalationLevel: 2,
-          escalationRule: null,
-          escalationValue: null,
-          contacts: []
-        }
-        eList.push(e)
-      } else {
-        e = eList[1]
-      }
-      if (!e.contacts.includes(item)) {
-        e.contacts.push(item)
-      }
-    },
-    selectThirdLevelRecipients(item) {
-      var eList = this.config.form.escalations
-      var e
-      if (eList.length === 2) {
-        e = {
-          escalationLevel: 3,
-          escalationRule: null,
-          escalationValue: null,
-          contacts: []
-        }
-        eList.push(e)
-      } else {
-        e = eList[2]
-      }
-      if (!e.contacts.includes(item)) {
-        e.contacts.push(item)
-      }
     }
   }
 }
 </script>
 
-<style scoped>
-
-</style>
