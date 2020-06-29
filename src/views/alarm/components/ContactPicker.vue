@@ -10,15 +10,36 @@
         value-key="userName"
         @select="addRecipients"
       />
-      <label v-if="escalation.escalationLevel > 1">when</label>
-      <el-select v-if="escalation.escalationLevel > 1" v-model="escalation.escalationRule" clearable placeholder="Select" style="width: 95px">
-        <el-option
-          v-for="item in dict.escalation_rule"
-          :key="item.id"
-          :label="item.label"
-          :value="item.value"
-        />
-      </el-select>
+      <div v-if="escalation.escalationLevel > 1" class="inline-container">
+        <label>when</label>
+        <el-select
+          v-if="escalation.escalationLevel > 1"
+          v-model="escalation.escalationRule"
+          clearable
+          placeholder="Select"
+          style="width: 95px"
+          @change="resetValue"
+        >
+          <el-option
+            v-for="item in dict.escalation_rule"
+            :key="item.id"
+            :label="item.label"
+            :value="item.value"
+          />
+        </el-select>
+      </div>
+      <div v-if="escalation.escalationLevel > 1 && escalation.escalationRule <= 2" class="inline-container">
+        <label>&gt;</label>
+        <el-input-number v-model="escalation.escalationValue" controls-position="right" style="width: 120px;" />
+        <label v-if="escalation.escalationRule == 1">mins</label>
+      </div>
+      <div v-else-if="escalation.escalationLevel > 1 && escalation.escalationRule == 3" class="inline-container">
+        <label>is</label>
+        <el-select v-model="escalation.escalationValue" placeholder="Select" style="width: 120px;">
+          <el-option label="work hours" value="work_hours" />
+          <el-option label="off hours" value="off_hours" />
+        </el-select>
+      </div>
     </span>
     <ul class="contacts-list">
       <li v-for="c in escalation.contacts" :key="c.userName">
@@ -64,6 +85,13 @@ export default {
       if (!this.escalation.contacts.includes(item)) {
         this.escalation.contacts.push(item)
       }
+    },
+    resetValue(ruleId) {
+      if (ruleId === '1' || ruleId === '2') {
+        this.escalation.escalationValue = 0
+      } else if (ruleId === '3') {
+        this.escalation.escalationValue = null
+      }
     }
   }
 }
@@ -77,5 +105,9 @@ ul.contacts-list {
 ul.contacts-list > li {
   float: left;
   margin: 2px 4px 2px 0px;
+  line-height: 14px;
+}
+div.inline-container {
+  display: inline-block;
 }
 </style>

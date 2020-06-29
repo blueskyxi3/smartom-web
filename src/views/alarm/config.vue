@@ -56,7 +56,7 @@
           <el-button :loading="crud.cu === 2" type="primary" @click="crud.submitCU">Continue</el-button>
         </div>
       </el-dialog>
-      <el-dialog :close-on-click-modal="false" :visible.sync="config.display" title="Configure Alarm" width="600px">
+      <el-dialog :close-on-click-modal="false" :visible.sync="config.display" title="Configure Alarm" width="700px">
         <el-form ref="configForm" :model="config.form" size="small" label-width="160px">
           <el-form-item prop="alarmDefinitionId" hidden="true">
             <el-input v-model="config.form.alarmDefinitionId" type="hidden" />
