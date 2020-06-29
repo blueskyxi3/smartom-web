@@ -17,7 +17,7 @@
           clearable
           placeholder="Condition"
           class="filter-item"
-          style="width: 130px"
+          style="width: 200px"
         >
           <el-option
             v-for="item in queryTypeOptions"
@@ -96,15 +96,13 @@
         <el-button-group class="crud-opts-right">
           <el-button
             size="mini"
-            plain
-            type="info"
             icon="el-icon-search"
-            @click="$_reset()"
+            @click="$_search()"
           />
           <el-button
             size="mini"
-            icon="el-icon-refresh"
-            @click="$_reset()"
+            :icon="iconstr"
+            @click="$_pause_play()"
           />
           <el-popover
             placement="bottom-end"
@@ -121,7 +119,13 @@
                 aria-hidden="true"
               />
             </el-button>
-            xxxxxxxxxxxxx
+            <el-input-number
+              v-model="num"
+              :min="1"
+              :max="5000"
+              label="Limit Number"
+              @change="$_search"
+            />
           </el-popover>
         </el-button-group>
       </div>
@@ -228,6 +232,7 @@ export default {
   },
   data() {
     return {
+      num: 100,
       token: 'aaa',
       topic: 'topic1',
       websock: null,
@@ -255,9 +260,11 @@ export default {
         '#FFFFFF'
       ],
       queryTypeOptions: [
-        { key: 'severity', display_name: 'severity' },
-        { key: 'systemType', display_name: 'systemType' }
-      ]
+        { key: 'systemType', display_name: 'System Type' },
+        { key: 'alarmCode', display_name: 'Alarm Code' },
+        { key: 'alarmSubject', display_name: 'Alarm Description' }
+      ],
+      iconstr: 'el-icon-video-pause'
     }
   },
   created() {
@@ -284,7 +291,8 @@ export default {
       return ''
     },
     $_search() {
-
+      const msg = this.$_getParams()
+      this.webSocketSend(msg)
     },
     $_switch(i) {
       if (this.serverity[i]) {
@@ -296,6 +304,38 @@ export default {
         this.color[i] = '#FFFFFF'
         this.serverity[i] = true
       }
+      const msg = this.$_getParams()
+      this.webSocketSend(msg)
+      this.$forceUpdate()
+    },
+    $_pause_play() {
+      if (this.iconstr === 'el-icon-video-play') {
+        this.iconstr = 'el-icon-video-pause'
+        this.initWebSocket()
+        this.$notify({
+          title: '启用成功!',
+          type: 'success',
+          duration: 3000
+        })
+      } else {
+        this.iconstr = 'el-icon-video-play'
+        this.websock.close(1000, 'client close session!!!')
+        this.$notify({
+          title: '暂停成功!',
+          type: 'success',
+          duration: 3000
+        })
+      }
+    },
+
+    $_reset() {
+      // this.websock.close(1000, 'client close session!')
+      this.query.type = ''
+      this.query.value = ''
+      this.num = 100
+    },
+    $_getParams() {
+      // serverity
       let str = '-1'
       this.serverity.forEach((s, i) => {
         // console.log('===index===' + i)
@@ -308,15 +348,16 @@ export default {
         token: this.token,
         event: this.topic,
         body: {
-          systemType: '',
-          severity: str
+          severity: str,
+          num: this.num + ''
         }
       }
-      this.webSocketSend(msg)
-      this.$forceUpdate()
-    },
-    $_reset() {
-      this.websock.close(1000, 'client close session!')
+      // alarmCode
+      if (this.query.type && this.query.value) {
+        msg.body[this.query.type] = this.query.value
+      }
+
+      return msg
     },
     initWebSocket() {
       // const wsUri = process.env.VUE_APP_WS_API + '/webSocket/deploy'
@@ -329,7 +370,9 @@ export default {
     },
     webSocketOnOpen(e) {
       console.log('websocket client open--->' + e)
-      this.websock.send('{"token": "' + this.token + '", "event": "' + this.topic + '"}')
+      const msg = this.$_getParams()
+      this.webSocketSend(msg)
+      // this.websock.send('{"token": "' + this.token + '", "event": "' + this.topic + '"}')
     },
     webSocketOnClose(e) {
       console.log('websocket client close--->' + e)
@@ -349,6 +392,14 @@ export default {
       this.tableData = data
     },
     webSocketSend(agentData) {
+      if (this.iconstr === 'el-icon-video-play') {
+        this.$notify({
+          title: '暂停中!',
+          type: 'warning',
+          duration: 5000
+        })
+        return
+      }
       console.log(JSON.stringify(agentData))
       this.websock.send(JSON.stringify(agentData))
     }
