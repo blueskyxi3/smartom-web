@@ -91,7 +91,7 @@
             :style="{ color: color[4],borderColor:color[4], backgroundColor: backGroundColor[4] }"
             @click="$_switch(4)"
           >
-            Info</el-button>
+            Info1</el-button>
         </span>
 
         <el-button-group class="crud-opts-right">
@@ -199,6 +199,15 @@
           </template>
         </el-table-column>
       </el-table>
+      <el-pagination
+        :page-size.sync="page.size"
+        :total="page.total"
+        :current-page.sync="page.page"
+        style="margin-top: 8px;"
+        layout="total, prev, pager, next, sizes"
+        @size-change="$_sizeChange($event)"
+        @current-change="$_pageChange"
+      />
     </div>
   </div>
 </template>
@@ -206,6 +215,7 @@
 <script>
 import { parseTime } from '@/utils/index'
 import udOperation from './panel/UD.operation'
+import { queryAlarmHis } from '@/api/alarm/alarmRecord'
 const MainColor = [
   'red', // critical
   '#f56308e9', // error
@@ -233,6 +243,7 @@ export default {
   },
   data() {
     return {
+      page: { size: 10, total: 0, page: 1 },
       num: 100,
       token: 'aaa',
       topic: 'topic1',
@@ -269,11 +280,9 @@ export default {
     }
   },
   created() {
-    this.initWebSocket()
+    this.queryAlarm()
   },
-  destroyed() {
-    this.websock.close() // 离开路由之后断开websocket连接
-  },
+
   methods: {
     tableRowClassName({ row, rowIndex }) {
       // console.info("**************")
@@ -291,9 +300,16 @@ export default {
       }
       return ''
     },
+    $_pageChange() {
+      console.log(JSON.stringify(this.page))
+    },
+    $_sizeChange(e) {
+      console.log(e)
+      console.log(JSON.stringify(this.page))
+    },
     $_search() {
-      const msg = this.$_getParams()
-      this.webSocketSend(msg)
+      // const msg = this.$_getParams()
+      // this.webSocketSend(msg)
     },
     $_switch(i) {
       if (this.serverity[i]) {
@@ -360,50 +376,19 @@ export default {
 
       return msg
     },
-    initWebSocket() {
-      // const wsUri = process.env.VUE_APP_WS_API + '/webSocket/deploy'
-      const wsUri = 'ws://127.0.0.1:12345/ws'
-      this.websock = new WebSocket(wsUri)
-      this.websock.onopen = this.webSocketOnOpen
-      this.websock.onerror = this.webSocketOnError
-      this.websock.onmessage = this.webSocketOnMessage
-      this.websock.onclose = this.webSocketOnClose
-    },
-    webSocketOnOpen(e) {
-      console.log('websocket client open--->' + e)
-      const msg = this.$_getParams()
-      this.webSocketSend(msg)
-      // this.websock.send('{"token": "' + this.token + '", "event": "' + this.topic + '"}')
-    },
-    webSocketOnClose(e) {
-      console.log('websocket client close--->' + e)
-      // this.websock.send("{\"token\": \"" + this.token + "\", \"event\": \"" + this.topic + "\"}")
-    },
-    webSocketOnError(e) {
-      this.$notify({
-        title: 'WebSocket连接发生错误',
-        type: 'error',
-        duration: 0
+    queryAlarm() {
+      const params = { severity: 1, alarmCode: '100' }
+      Object.assign(params, this.page)
+      console.log(JSON.stringify(params))
+      queryAlarmHis(params).then((res) => {
+        debugger
+        console.log(JSON.stringify(res))
+      }).catch((e) => {
+        console.log(e)
+        // this.loading = false
       })
-    },
-    webSocketOnMessage(e) {
-      // this.tableData = e.data
-      const data = JSON.parse(e.data)
-      console.log(data)
-      this.tableData = data
-    },
-    webSocketSend(agentData) {
-      if (this.iconstr === 'el-icon-video-play') {
-        this.$notify({
-          title: '暂停中!',
-          type: 'warning',
-          duration: 5000
-        })
-        return
-      }
-      console.log(JSON.stringify(agentData))
-      this.websock.send(JSON.stringify(agentData))
     }
+
   }
 }
 </script>

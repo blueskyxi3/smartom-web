@@ -24,4 +24,12 @@ export function edit(data) {
   })
 }
 
-export default { add, edit, del }
+export function queryAlarmHis(params) {
+  return request({
+    url: 'alarm-api/alarmRecord/alarmhis',
+    method: 'get',
+    params: params
+  })
+}
+
+export default { add, edit, del, queryAlarmHis }
