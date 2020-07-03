@@ -91,7 +91,7 @@
             :style="{ color: color[4],borderColor:color[4], backgroundColor: backGroundColor[4] }"
             @click="$_switch(4)"
           >
-            Info1</el-button>
+            Info</el-button>
         </span>
 
         <el-button-group class="crud-opts-right">
@@ -120,13 +120,7 @@
                 aria-hidden="true"
               />
             </el-button>
-            <el-input-number
-              v-model="num"
-              :min="1"
-              :max="5000"
-              label="Limit Number"
-              @change="$_search"
-            />
+            xxxxxxx
           </el-popover>
         </el-button-group>
       </div>
@@ -141,17 +135,17 @@
           width="80"
         />
         <el-table-column
-          prop="alarmSubject"
+          prop="alarm_subject"
           label="Alarm Description"
           width="180"
         />
         <el-table-column
-          prop="systemTypeDesc"
+          prop="system_type_desc"
           label="System Type"
           width="180"
         />
         <el-table-column
-          prop="alarmCode"
+          prop="alarm_code"
           label="Alarm Code"
           width="180"
         />
@@ -166,28 +160,34 @@
           </template>
         </el-table-column>
         <el-table-column
-          prop="alarmTime"
-          label="Alarm Time"
+          prop="created_time"
+          label="Created Time"
           width="180"
           :show-overflow-tooltip="true"
         >
           <template slot-scope="scope">
-            <span>{{ scope.row.alarmTime|parseTime }}</span>
+            <span>{{ scope.row.created_time|parseTime }}</span>
+          </template>
+        </el-table-column>
+
+        <el-table-column
+          prop="created_by"
+          label="Created By"
+        />
+
+        <el-table-column
+          prop="updated_time"
+          label="Updated Time"
+          width="180"
+          :show-overflow-tooltip="true"
+        >
+          <template slot-scope="scope">
+            <span>{{ scope.row.updated_time|parseTime }}</span>
           </template>
         </el-table-column>
         <el-table-column
-          prop="duration"
-          label="Duration"
-          width="80"
-        />
-        <el-table-column
-          prop="count"
-          label="Count"
-          width="80"
-        />
-        <el-table-column
-          prop="createBy"
-          label="Create By"
+          prop="updated_by"
+          label="Updated By"
         />
         <el-table-column
           label="Actions"
@@ -244,10 +244,6 @@ export default {
   data() {
     return {
       page: { size: 10, total: 0, page: 1 },
-      num: 100,
-      token: 'aaa',
-      topic: 'topic1',
-      websock: null,
       serverity: [
         false,
         false,
@@ -280,7 +276,7 @@ export default {
     }
   },
   created() {
-    this.queryAlarm()
+
   },
 
   methods: {
@@ -302,14 +298,27 @@ export default {
     },
     $_pageChange() {
       console.log(JSON.stringify(this.page))
+      this.$_search()
     },
     $_sizeChange(e) {
       console.log(e)
       console.log(JSON.stringify(this.page))
+      this.$_search()
     },
     $_search() {
       // const msg = this.$_getParams()
-      // this.webSocketSend(msg)
+      // const params = { severity: 1, alarmCode: '100' }
+      const params = this.$_getParams()
+      Object.assign(params, this.page)
+      console.log(JSON.stringify(params))
+      queryAlarmHis(params).then((res) => {
+        console.log(JSON.stringify(res))
+        this.tableData = res.content
+        this.page.total = res.totalElements
+      }).catch((e) => {
+        console.log(e)
+        this.$message.error('查询报错!')
+      })
     },
     $_switch(i) {
       if (this.serverity[i]) {
@@ -321,14 +330,14 @@ export default {
         this.color[i] = '#FFFFFF'
         this.serverity[i] = true
       }
-      const msg = this.$_getParams()
-      this.webSocketSend(msg)
+      // const msg = this.$_getParams()
+      this.$_search()
       this.$forceUpdate()
     },
     $_pause_play() {
       if (this.iconstr === 'el-icon-video-play') {
         this.iconstr = 'el-icon-video-pause'
-        this.initWebSocket()
+
         this.$notify({
           title: '启用成功!',
           type: 'success',
@@ -336,7 +345,7 @@ export default {
         })
       } else {
         this.iconstr = 'el-icon-video-play'
-        this.websock.close(1000, 'client close session!!!')
+
         this.$notify({
           title: '暂停成功!',
           type: 'success',
@@ -349,46 +358,28 @@ export default {
       // this.websock.close(1000, 'client close session!')
       this.query.type = ''
       this.query.value = ''
-      this.num = 100
     },
     $_getParams() {
       // serverity
       let str = '-1'
       this.serverity.forEach((s, i) => {
-        // console.log('===index===' + i)
         if (s) {
           str = str + ',' + i
         }
       })
-      if (str === '-1') str = ''
-      const msg = {
-        token: this.token,
-        event: this.topic,
-        body: {
-          severity: str,
-          num: this.num + ''
-        }
+
+      let msg = {}
+      if (str !== '-1') {
+        msg = { severity: str }
       }
+
       // alarmCode
       if (this.query.type && this.query.value) {
-        msg.body[this.query.type] = this.query.value
+        msg[this.query.type] = this.query.value
       }
 
       return msg
-    },
-    queryAlarm() {
-      const params = { severity: 1, alarmCode: '100' }
-      Object.assign(params, this.page)
-      console.log(JSON.stringify(params))
-      queryAlarmHis(params).then((res) => {
-        debugger
-        console.log(JSON.stringify(res))
-      }).catch((e) => {
-        console.log(e)
-        // this.loading = false
-      })
     }
-
   }
 }
 </script>
