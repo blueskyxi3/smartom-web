@@ -74,7 +74,7 @@
         </el-form>
         <div slot="footer" class="dialog-footer">
           <el-button type="text">Back</el-button>
-          <el-button type="primary">Done</el-button>
+          <el-button type="primary" @click="doConfig">Done</el-button>
         </div>
       </el-dialog>
       <!--表格渲染-->
@@ -115,12 +115,12 @@
       </el-table>
       <!--分页组件-->
       <pagination />
-    </div>recipients
+    </div>
   </div>
 </template>
 
 <script>
-import crudAlarmDefinition, { getByAlarmCode } from '@/api/alarm/alarmDefinition'
+import crudAlarmDefinition, { getByAlarmCode, config, loadAlarmConfig } from '@/api/alarm/alarmDefinition'
 import CRUD, { presenter, header, form, crud } from '@crud/crud'
 import rrOperation from '@crud/RR.operation'
 import crudOperation from '@crud/CRUD.operation'
@@ -183,33 +183,14 @@ export default {
         display: false,
         form: {
           alarmDefinitionId: null,
-          // Initialize 3 escalation levels
-          escalations: [
-            {
-              escalationLevel: 1,
-              escalationRule: null,
-              escalationValue: null,
-              contacts: []
-            },
-            {
-              escalationLevel: 2,
-              escalationRule: null,
-              escalationValue: null,
-              contacts: []
-            },
-            {
-              escalationLevel: 3,
-              escalationRule: null,
-              escalationValue: null,
-              contacts: []
-            }
-          ]
+          escalations: []
         }
       },
       recipients: []
     }
   },
   mounted() {
+    // load full list of contacts in system
     loadAllContacts().then(result => {
       if (result) {
         this.recipients = result
@@ -217,6 +198,9 @@ export default {
         console.log('No contacts found')
       }
     })
+
+    // initialize escalations
+    this.initEscalations()
   },
   methods: {
     // 获取数据前设置好接口地址
@@ -230,11 +214,46 @@ export default {
     [CRUD.HOOK.afterSubmit]() {
       console.log('Submit complete')
     },
+    initEscalations() {
+      // Initialize 3 escalation levels
+      this.config.form.escalations = [
+        {
+          escalationLevel: 1,
+          escalationRule: null,
+          escalationValue: null,
+          contacts: []
+        },
+        {
+          escalationLevel: 2,
+          escalationRule: null,
+          escalationValue: null,
+          contacts: []
+        },
+        {
+          escalationLevel: 3,
+          escalationRule: null,
+          escalationValue: null,
+          contacts: []
+        }
+      ]
+    },
     toConfig(alarmDefId) {
-      this.config.form.alarmDefinitionId = alarmDefId
-      this.config.display = true
+      loadAlarmConfig(Number(alarmDefId)).then(result => {
+        if (result) {
+          this.config.form.alarmDefinitionId = result.alarmDefinitionId
+          this.initEscalations()
+          // Use Vue.set to update array item
+          result.escalations.forEach((item, index) => this.$set(this.config.form.escalations, index, item))
+          this.config.display = true
+        } else {
+          console.log('No result found')
+        }
+      })
+    },
+    doConfig() {
+      config(this.config.form)
+      this.config.display = false
     }
   }
 }
 </script>
-
