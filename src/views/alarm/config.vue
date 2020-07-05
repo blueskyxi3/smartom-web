@@ -57,7 +57,7 @@
         </div>
       </el-dialog>
       <el-dialog :close-on-click-modal="false" :visible.sync="config.display" title="Configure Alarm" width="700px">
-        <el-form ref="configForm" :model="config.form" size="small" label-width="160px">
+        <el-form ref="configForm" :model="config.form" :rules="configValidationRules" size="small" label-width="160px">
           <el-form-item prop="alarmDefinitionId" hidden="true">
             <el-input v-model="config.form.alarmDefinitionId" type="hidden" />
           </el-form-item>
@@ -151,11 +151,40 @@ export default {
         })
       }
     }
+    const validateFirstLevel = (rule, value, callback) => {
+      const escalation = this.config.form.escalations[0]
+      if (escalation.contacts.length > 0) {
+        callback()
+      } else {
+        callback(new Error('Please select at least one contact'))
+      }
+    }
+    const validateHigherLevels = (escalation, callback) => {
+      if (escalation.contacts.length === 0 && !escalation.escalationRule && !escalation.escalationValue) {
+        // Skip validation when nothing input
+        callback()
+      } else if (escalation.contacts.length === 0) {
+        callback(new Error('Please select at least one contact'))
+      } else if (!escalation.escalationRule) {
+        callback(new Error('Please select escalation rule'))
+      } else if (!escalation.escalationValue) {
+        callback(new Error('Please select escalation value'))
+      } else {
+        callback()
+      }
+    }
+    const validateSecondLevel = (rule, value, callback) => {
+      validateHigherLevels(this.config.form.escalations[1], callback)
+    }
+    const validateThirdLevel = (rule, value, callback) => {
+      validateHigherLevels(this.config.form.escalations[2], callback)
+    }
     return {
       permission: {
         add: ['admin', 'alarmDefinition:add'],
         edit: ['admin', 'alarmDefinition:edit'],
-        del: ['admin', 'alarmDefinition:del']
+        del: ['admin', 'alarmDefinition:del'],
+        config: ['admin', 'alarmDefinition:config']
       },
       rules: {
         systemType: [
@@ -185,6 +214,17 @@ export default {
           alarmDefinitionId: null,
           escalations: []
         }
+      },
+      configValidationRules: {
+        firstLevelRecipients: [
+          { required: true, trigger: 'change', type: 'array', validator: validateFirstLevel }
+        ],
+        secondLevelRecipients: [
+          { required: false, trigger: 'change', type: 'array', validator: validateSecondLevel }
+        ],
+        thirdLevelRecipients: [
+          { required: false, trigger: 'change', type: 'array', validator: validateThirdLevel }
+        ]
       },
       recipients: []
     }
@@ -251,8 +291,13 @@ export default {
       })
     },
     doConfig() {
-      config(this.config.form)
-      this.config.display = false
+      this.$refs['configForm'].validate(valid => {
+        if (!valid) {
+          return
+        }
+        config(this.config.form)
+        this.config.display = false
+      })
     }
   }
 }

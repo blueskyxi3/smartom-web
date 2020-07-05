@@ -30,12 +30,12 @@
       </div>
       <div v-if="escalation.escalationLevel > 1 && escalation.escalationRule <= 2" class="inline-container">
         <label>&gt;</label>
-        <el-input-number v-model="escalation.escalationValue" controls-position="right" style="width: 120px;" />
+        <el-input-number v-model="escalation.escalationValue" controls-position="right" style="width: 120px;" @change="emitChangeEvent" />
         <label v-if="escalation.escalationRule == 1">mins</label>
       </div>
       <div v-else-if="escalation.escalationLevel > 1 && escalation.escalationRule == 3" class="inline-container">
         <label>is</label>
-        <el-select v-model="escalation.escalationValue" placeholder="Select" style="width: 120px;">
+        <el-select v-model="escalation.escalationValue" placeholder="Select" style="width: 120px;" @change="emitChangeEvent">
           <el-option label="work hours" value="work_hours" />
           <el-option label="off hours" value="off_hours" />
         </el-select>
@@ -68,6 +68,7 @@ export default {
       const idx = contactList.indexOf(contact)
       if (idx > -1) {
         contactList.splice(idx, 1)
+        this.emitChangeEvent()
       }
     },
     querySearch(queryString, cb) {
@@ -84,6 +85,7 @@ export default {
     addRecipients(item) {
       if (!this.escalation.contacts.includes(item)) {
         this.escalation.contacts.push(item)
+        this.emitChangeEvent()
       }
     },
     resetValue(ruleId) {
@@ -92,6 +94,10 @@ export default {
       } else if (ruleId === '3') {
         this.escalation.escalationValue = null
       }
+      this.emitChangeEvent()
+    },
+    emitChangeEvent() {
+      this.$emit('change')
     }
   }
 }
