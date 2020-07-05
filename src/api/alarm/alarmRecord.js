@@ -24,6 +24,27 @@ export function edit(data) {
   })
 }
 
+export function pause(code) {
+  return request({
+    url: 'alarm-api/alarmRecord/pause/' + code,
+    method: 'get'
+  })
+}
+
+export function resume(code) {
+  return request({
+    url: 'alarm-api/alarmRecord/resume/' + code,
+    method: 'get'
+  })
+}
+
+export function clear(code) {
+  return request({
+    url: 'alarm-api/alarmRecord/clear/' + code,
+    method: 'delete'
+  })
+}
+
 export function queryAlarmHis(params) {
   return request({
     url: 'alarm-api/alarmRecord/alarmhis',
@@ -32,4 +53,19 @@ export function queryAlarmHis(params) {
   })
 }
 
-export default { add, edit, del, queryAlarmHis }
+export function addGuide(data) {
+  return request({
+    url: 'alarm-api/alarmRecord/alarmGuide',
+    method: 'post',
+    data
+  })
+}
+
+export function getGuide(definitionId) {
+  return request({
+    url: 'alarm-api/alarmRecord/alarmGuide/' + definitionId,
+    method: 'get'
+  })
+}
+
+export default { add, edit, del, resume, pause, clear, addGuide, getGuide, queryAlarmHis }

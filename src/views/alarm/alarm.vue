@@ -186,16 +186,23 @@
           width="80"
         />
         <el-table-column
-          prop="createBy"
-          label="Create By"
+          prop="createdBy"
+          label="Created By"
+        />
+        <el-table-column
+          prop="updatedBy"
+          label="Updated By"
         />
         <el-table-column
           label="Actions"
-          width="150px"
+          width="200px"
           align="center"
         >
           <template slot-scope="scope">
-            <udOperation :data="scope.row" />
+            <udOperation
+              :data="scope.row"
+              @event_refresh="$_search"
+            />
           </template>
         </el-table-column>
       </el-table>
@@ -278,6 +285,9 @@ export default {
     tableRowClassName({ row, rowIndex }) {
       // console.info("**************")
       // console.log("------------------>>>>>" + JSON.stringify(row))
+      if (row.status === 2) {
+        return 'pending-row'
+      }
       if (row.severity === 0) {
         return 'critical-row'
       } else if (row.severity === 1) {
@@ -292,6 +302,7 @@ export default {
       return ''
     },
     $_search() {
+      console.log('search')
       const msg = this.$_getParams()
       this.webSocketSend(msg)
     },

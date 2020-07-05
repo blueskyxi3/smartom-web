@@ -189,15 +189,6 @@
           prop="updated_by"
           label="Updated By"
         />
-        <el-table-column
-          label="Actions"
-          width="150px"
-          align="center"
-        >
-          <template slot-scope="scope">
-            <udOperation :data="scope.row" />
-          </template>
-        </el-table-column>
       </el-table>
       <el-pagination
         :page-size.sync="page.size"
@@ -214,7 +205,6 @@
 
 <script>
 import { parseTime } from '@/utils/index'
-import udOperation from './panel/UD.operation'
 import { queryAlarmHis } from '@/api/alarm/alarmRecord'
 const MainColor = [
   'red', // critical
@@ -225,9 +215,7 @@ const MainColor = [
 ]
 
 export default {
-  name: 'AlarmPanel',
-  components: { udOperation },
-
+  name: 'AlarmHis',
   filters: {
     parseTime(value) {
       return parseTime(value)
@@ -384,28 +372,4 @@ export default {
 }
 </script>
 <style>
-.crud-opts {
-  padding: 6px 0;
-  display: -webkit-flex;
-  display: flex;
-  align-items: center;
-}
-.crud-opts .crud-opts-right {
-  margin-left: auto;
-}
-.el-table .critical-row {
-  background: red;
-}
-.el-table .error-row {
-  background: #f56308e9;
-}
-.el-table .alert-row {
-  color: #f5aa08e9;
-}
-.el-table .warning-row {
-  color: #f5d908f9;
-}
-.el-table .info-row {
-  color: #37a019f0;
-}
 </style>
