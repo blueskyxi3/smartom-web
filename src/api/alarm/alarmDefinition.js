@@ -24,6 +24,14 @@ export function edit(data) {
   })
 }
 
+export function config(data) {
+  return request({
+    url: 'alarm-api/alarmDefinition/config',
+    method: 'post',
+    data
+  })
+}
+
 export function getByAlarmCode(masterCode, subCode) {
   if (!(masterCode === '' || masterCode === undefined || masterCode == null ||
         subCode === '' || subCode === undefined || subCode == null)) {
@@ -32,6 +40,13 @@ export function getByAlarmCode(masterCode, subCode) {
       method: 'get'
     })
   }
+}
+
+export function loadAlarmConfig(id) {
+  return request({
+    url: 'alarm-api/alarmDefinition/config/' + id,
+    method: 'get'
+  })
 }
 
 export default { add, edit, del }
