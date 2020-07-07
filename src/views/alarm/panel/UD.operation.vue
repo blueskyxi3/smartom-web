@@ -17,8 +17,9 @@
         slot="reference"
         :disabled="disabledDle"
         type="primary"
-        icon="el-icon-edit"
+        icon="el-icon-edit-outline"
         size="mini"
+        class="action-btn"
         @click="toGuideline"
       />
     </el-popover>
@@ -27,6 +28,7 @@
       size="mini"
       type="primary"
       :icon="iconstr"
+      class="action-btn"
       @click="toPauseAndResume(data)"
     />
     <el-popover
@@ -43,19 +45,20 @@
           size="mini"
           type="text"
           @click="doCancel"
-        >取消</el-button>
+        >No</el-button>
         <el-button
           type="primary"
           size="mini"
           @click="doDelete(data)"
-        >确定</el-button>
+        >Yes</el-button>
       </div>
       <el-button
         slot="reference"
         :disabled="disabledDle"
-        type="danger"
-        icon="el-icon-delete"
+        type="primary"
+        icon="el-icon-circle-close"
         size="mini"
+        class="action-btn"
         @click="toDelete"
       />
     </el-popover>
@@ -81,7 +84,7 @@ export default {
     },
     msg: {
       type: String,
-      default: '确定删除本条数据吗？'
+      default: 'Clear this alarm ?'
     }
   },
   data() {
@@ -116,11 +119,11 @@ export default {
       this.pop = false
       clear(data.alarmCode).then((res) => {
         console.log(JSON.stringify(res))
-        this.$message.success('操作成功!')
+        this.$message.success('Alarm cleared!')
         this.$emit('event_refresh', true)
       }).catch((e) => {
         console.log(e)
-        this.$message.error('操作报错!')
+        this.$message.error('Error occured.')
       })
     },
     toEdit(data) {
@@ -131,20 +134,20 @@ export default {
       if (data.status === 2) {
         resume(data.alarmCode).then((res) => {
           console.log(JSON.stringify(res))
-          this.$message.success('恢复成功!')
+          this.$message.success('Alarm resumed')
           this.$emit('event_refresh', true)
         }).catch((e) => {
           console.log(e)
-          this.$message.error('操作报错!')
+          this.$message.error('Error occured.')
         })
       } else {
         pause(data.alarmCode).then((res) => {
           console.log(JSON.stringify(res))
-          this.$message.success('暂停成功!')
+          this.$message.success('Alarm suspended')
           this.$emit('event_refresh', true)
         }).catch((e) => {
           console.log(e)
-          this.$message.error('操作报错!')
+          this.$message.error('Error occured.')
         })
       }
     },
@@ -173,3 +176,8 @@ export default {
   }
 }
 </script>
+<style scoped>
+.action-btn {
+  font-size: 20px;
+}
+</style>

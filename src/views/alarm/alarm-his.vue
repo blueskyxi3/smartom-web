@@ -207,11 +207,11 @@
 import { parseTime } from '@/utils/index'
 import { queryAlarmHis } from '@/api/alarm/alarmRecord'
 const MainColor = [
-  'red', // critical
-  '#f56308e9', // error
-  '#f5aa08e9', // alert
-  '#f5d908f9', // waringing
-  '#37a019f0'// info
+  '#CF2A27', // critical
+  '#E06666', // error
+  '#FF9900', // alert
+  '#FFD966', // waringing
+  '#B6D7A8'// info
 ]
 
 export default {
@@ -315,7 +315,7 @@ export default {
         this.serverity[i] = false
       } else {
         this.backGroundColor[i] = MainColor[i]
-        this.color[i] = '#FFFFFF'
+        this.color[i] = '#000000'
         this.serverity[i] = true
       }
       // const msg = this.$_getParams()

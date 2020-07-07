@@ -214,11 +214,11 @@
 import { parseTime } from '@/utils/index'
 import udOperation from './panel/UD.operation'
 const MainColor = [
-  'red', // critical
-  '#f56308e9', // error
-  '#f5aa08e9', // alert
-  '#f5d908f9', // waringing
-  '#37a019f0'// info
+  '#CF2A27', // critical
+  '#E06666', // error
+  '#FF9900', // alert
+  '#FFD966', // waringing
+  '#B6D7A8'// info
 ]
 
 export default {
@@ -313,7 +313,7 @@ export default {
         this.serverity[i] = false
       } else {
         this.backGroundColor[i] = MainColor[i]
-        this.color[i] = '#FFFFFF'
+        this.color[i] = '#000000'
         this.serverity[i] = true
       }
       const msg = this.$_getParams()
@@ -429,18 +429,26 @@ export default {
   margin-left: auto;
 }
 .el-table .critical-row {
-  background: red;
+  background: #CF2A27;
+  color: black;
 }
 .el-table .error-row {
-  background: #f56308e9;
+  background: #E06666;
+  color: black;
 }
 .el-table .alert-row {
-  color: #f5aa08e9;
+  background: #FF9900;
+  color: black;
 }
 .el-table .warning-row {
-  color: #f5d908f9;
+  background: #FFD966;
+  color: black;
 }
 .el-table .info-row {
-  color: #37a019f0;
+  background: #B6D7A8;
+  color: black;
+}
+.el-table .pending-row {
+  color: #6c757d;
 }
 </style>

@@ -17,7 +17,7 @@
         size="medium"
         type="primary"
         @click="doSubmit"
-      >保存</el-button>
+      >Save</el-button>
     </el-form>
   </div>
 </template>
@@ -90,12 +90,12 @@ export default {
       console.info(JSON.stringify(params))
       addGuide(params).then(res => {
         this.loading = false
-        this.$message.success('操作成功!')
+        this.$message.success('Guideline saved')
         this.$emit('event_guide', true)
       }).catch(err => {
         this.loading = false
         console.log(err.response.data.message)
-        this.$message.error('操作报错!')
+        this.$message.error('Error occured')
         this.$emit('event_guide', true)
       })
     }
