@@ -7,7 +7,23 @@
         <el-select v-model="query.type" clearable placeholder="Condition" class="filter-item" style="width: 130px">
           <el-option v-for="item in queryTypeOptions" :key="item.key" :label="item.display_name" :value="item.key" />
         </el-select>
-        <el-input v-model="query.value" clearable placeholder="Search" style="width: 200px;" class="filter-item" @keyup.enter.native="crud.toQuery" />
+        <el-select v-if="query.type == 'severity'" v-model="query.value" clearable placeholder="Search" style="width: 200px;" class="filter-item">
+          <el-option
+            v-for="item in dict.alarm_severity"
+            :key="item.id"
+            :label="item.label"
+            :value="item.value"
+          />
+        </el-select>
+        <el-select v-else-if="query.type == 'systemType'" v-model="query.value" clearable placeholder="Search" style="width: 200px;" class="filter-item">
+          <el-option
+            v-for="item in dict.system_type"
+            :key="item.id"
+            :label="item.label"
+            :value="item.value"
+          />
+        </el-select>
+        <el-input v-else v-model="query.value" clearable placeholder="Search" style="width: 200px;" class="filter-item" @keyup.enter.native="crud.toQuery" />
         <rrOperation :crud="crud" />
       </div>
       <!--如果想在工具栏加入更多按钮，可以使用插槽方式， slot = 'left' or 'right'-->
@@ -253,6 +269,7 @@ export default {
     },
     [CRUD.HOOK.afterSubmit]() {
       console.log('Submit complete')
+      debugger
     },
     initEscalations() {
       // Initialize 3 escalation levels

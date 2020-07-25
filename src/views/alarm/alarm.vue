@@ -18,7 +18,16 @@
             :value="item.key"
           />
         </el-select>
+        <el-select v-if="query.type == 'systemType'" v-model="query.value" clearable placeholder="Search" style="width: 200px;" class="filter-item">
+          <el-option
+            v-for="item in dict.system_type"
+            :key="item.id"
+            :label="item.label"
+            :value="item.value"
+          />
+        </el-select>
         <el-input
+          v-else
           v-model="query.value"
           clearable
           placeholder="Search"
@@ -224,7 +233,7 @@ const MainColor = [
 export default {
   name: 'AlarmPanel',
   components: { udOperation },
-
+  dicts: ['system_type'],
   filters: {
     parseTime(value) {
       return parseTime(value)
@@ -373,7 +382,7 @@ export default {
     },
     initWebSocket() {
       // const wsUri = process.env.VUE_APP_WS_API + '/webSocket/deploy'
-      const wsUri = 'ws://127.0.0.1:12345/ws'
+      const wsUri = 'ws://10.0.0.11:12345/ws'
       this.websock = new WebSocket(wsUri)
       this.websock.onopen = this.webSocketOnOpen
       this.websock.onerror = this.webSocketOnError
