@@ -2,6 +2,7 @@
   <div>
     <span>
       <el-autocomplete
+        v-model="inputBuffer"
         class="inline-input"
         :fetch-suggestions="querySearch"
         placeholder="Select"
@@ -63,6 +64,11 @@ export default {
       required: true
     }
   },
+  data() {
+    return {
+      inputBuffer: '' // a buffer variable, purpose is to make the typed characters visible
+    }
+  },
   methods: {
     removeRecipient(contactList, contact) {
       const idx = contactList.indexOf(contact)
@@ -85,6 +91,7 @@ export default {
     addRecipients(item) {
       if (!this.escalation.contacts.includes(item)) {
         this.escalation.contacts.push(item)
+        this.inputBuffer = '' // cleanup the buffer after selection
         this.emitChangeEvent()
       }
     },
