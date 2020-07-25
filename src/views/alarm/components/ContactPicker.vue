@@ -69,6 +69,13 @@ export default {
       inputBuffer: '' // a buffer variable, purpose is to make the typed characters visible
     }
   },
+  beforeUpdate() {
+    // Change the data type of escalationRule to String so the el-select would correctly display selected label
+    const r = this.escalation.escalationRule
+    if (r) {
+      this.escalation.escalationRule = String(r)
+    }
+  },
   methods: {
     removeRecipient(contactList, contact) {
       const idx = contactList.indexOf(contact)

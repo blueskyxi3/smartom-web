@@ -245,6 +245,13 @@ export default {
       recipients: []
     }
   },
+  beforeUpdate() {
+    // Change the data type of systemType and severity to String so the el-select would correctly display selected label
+    const t = this.form.systemType
+    const s = this.form.severity
+    if (t) this.form.systemType = String(t)
+    if (s) this.form.severity = String(s)
+  },
   mounted() {
     // load full list of contacts in system
     loadAllContacts().then(result => {
