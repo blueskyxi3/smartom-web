@@ -42,9 +42,9 @@ export function getByAlarmCode(masterCode, subCode) {
   }
 }
 
-export function loadAlarmConfig(id) {
+export function loadAlarmConfig(alarmCode) {
   return request({
-    url: 'alarm-api/alarmDefinition/config/' + id,
+    url: 'alarm-api/alarmDefinition/config/' + alarmCode,
     method: 'get'
   })
 }

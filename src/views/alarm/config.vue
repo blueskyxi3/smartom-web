@@ -67,7 +67,7 @@
             <el-input v-model="form.autoClearTime" style="width: 60px;" />&nbsp; minutes
           </el-form-item>
           <el-form-item label="Template" prop="alarmTemplateId">
-            <el-select v-model="form.alarmTemplateId" style="width: 224px;" disabled="true">
+            <el-select v-model="form.alarmTemplateId" style="width: 224px;" disabled>
               <el-option label="Default Alarm Template" value="1" />
             </el-select>
           </el-form-item>
@@ -124,7 +124,7 @@
             <el-button
               icon="el-icon-setting"
               size="mini"
-              @click="toConfig(scope.row.id)"
+              @click="toConfig(scope.row.masterCode + '-' + scope.row.subCode)"
             />
             <el-button
               icon="el-icon-message"
@@ -233,7 +233,8 @@ export default {
         form: {
           alarmDefinitionId: null,
           escalations: []
-        }
+        },
+        alarmCode: null
       },
       configValidationRules: {
         firstLevelRecipients: [
@@ -282,9 +283,12 @@ export default {
       }
       return true
     },
+    [CRUD.HOOK.beforeSubmit]() {
+      // Get alarm code to config before submit
+      this.config.alarmCode = this.form.masterCode + '-' + this.form.subCode
+    },
     [CRUD.HOOK.afterSubmit]() {
-      console.log('Submit complete')
-      debugger
+      this.toConfig(this.config.alarmCode)
     },
     initEscalations() {
       // Initialize 3 escalation levels
@@ -309,8 +313,8 @@ export default {
         }
       ]
     },
-    toConfig(alarmDefId) {
-      loadAlarmConfig(Number(alarmDefId)).then(result => {
+    toConfig(alarmCode) {
+      loadAlarmConfig(alarmCode).then(result => {
         if (result) {
           this.config.form.alarmDefinitionId = result.alarmDefinitionId
           this.initEscalations()
