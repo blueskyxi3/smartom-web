@@ -159,7 +159,7 @@ export default {
       } else {
         // Check whether the alarm code exists in system
         getByAlarmCode(this.form.masterCode, this.form.subCode).then(result => {
-          if (result) {
+          if (result && result.id !== this.form.id) {
             callback(new Error('Alarm code already exists'))
           } else {
             callback()
