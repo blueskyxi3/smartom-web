@@ -66,6 +66,11 @@
           <el-form-item label="Auto-clear after" prop="autoClearTime">
             <el-input v-model="form.autoClearTime" style="width: 60px;" />&nbsp; minutes
           </el-form-item>
+          <el-form-item label="Template" prop="alarmTemplateId">
+            <el-select v-model="form.alarmTemplateId" style="width: 224px;" disabled="true">
+              <el-option label="Default Alarm Template" value="1" />
+            </el-select>
+          </el-form-item>
         </el-form>
         <div slot="footer" class="dialog-footer">
           <el-button type="text" @click="crud.cancelCU">Cancel</el-button>
@@ -86,7 +91,6 @@
           <el-form-item label="3rd Level Recipients" prop="thirdLevelRecipients">
             <ContactPicker :escalation="config.form.escalations[2]" :recipients="recipients" />
           </el-form-item>
-          <el-form-item label="Template" />
         </el-form>
         <div slot="footer" class="dialog-footer">
           <el-button type="text">Back</el-button>
@@ -249,8 +253,12 @@ export default {
     // Change the data type of systemType and severity to String so the el-select would correctly display selected label
     const t = this.form.systemType
     const s = this.form.severity
-    if (t) this.form.systemType = String(t)
-    if (s) this.form.severity = String(s)
+    if (t !== null) this.form.systemType = String(t)
+    if (s !== null) this.form.severity = String(s)
+    // When creating a new alarm, the 'isEnabled' property should be true
+    if (this.form.id === null) this.form.isEnabled = true
+    // Default template id
+    this.form.alarmTemplateId = String(1)
   },
   mounted() {
     // load full list of contacts in system
