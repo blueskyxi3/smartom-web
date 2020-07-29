@@ -49,4 +49,12 @@ export function loadAlarmConfig(alarmCode) {
   })
 }
 
+export function testAlarm(data) {
+  return request({
+    url: 'alarm-api/alarmDefinition/test',
+    method: 'post',
+    data
+  })
+}
+
 export default { add, edit, del }

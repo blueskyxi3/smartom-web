@@ -94,7 +94,22 @@
         </el-form>
         <div slot="footer" class="dialog-footer">
           <el-button v-if="config.masterCode !== null && config.subCode !== null" type="text" @click="backToEdit">Back</el-button>
+          <el-button v-else type="text" @click="config.display = false">Cancel</el-button>
           <el-button type="primary" @click="doConfig">Done</el-button>
+        </div>
+      </el-dialog>
+      <el-dialog :close-on-click-modal="false" :visible.sync="test.display" title="Test Alarm" width="500px">
+        <el-form ref="testForm" :model="test.form" :rules="testValidationRules" size="small" label-width="120px">
+          <el-form-item label="Recipients" prop="recipients">
+            <MedialChannel :recipients="test.form.recipients" />
+          </el-form-item>
+          <el-form-item label="Message body" prop="messageBody">
+            <el-input v-model="test.form.messageBody" type="textarea" />
+          </el-form-item>
+        </el-form>
+        <div slot="footer" class="dialog-footer">
+          <el-button type="text" @click="cancelTest">Cancel</el-button>
+          <el-button type="primary" @click="doTest">Go</el-button>
         </div>
       </el-dialog>
       <!--表格渲染-->
@@ -119,17 +134,22 @@
             <span v-else>Disabled</span>
           </template>
         </el-table-column>
-        <el-table-column v-permission="['admin','alarmDefinition:config','alarmDefinition:test']" label="Actions" width="150px" align="center">
+        <el-table-column v-permission="['admin','alarmDefinition:config','alarmDefinition:test']" label="Actions" width="250px" align="center">
           <template slot-scope="scope">
             <el-button
               icon="el-icon-setting"
               size="mini"
               @click="toConfig(scope.row.masterCode + '-' + scope.row.subCode)"
-            />
+            >
+              Config
+            </el-button>
             <el-button
               icon="el-icon-message"
               size="mini"
-            />
+              @click="toTest(scope.row.masterCode + '-' + scope.row.subCode)"
+            >
+              Test
+            </el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -140,20 +160,22 @@
 </template>
 
 <script>
-import crudAlarmDefinition, { getByAlarmCode, config, loadAlarmConfig } from '@/api/alarm/alarmDefinition'
+import crudAlarmDefinition, { getByAlarmCode, config, loadAlarmConfig, testAlarm } from '@/api/alarm/alarmDefinition'
 import CRUD, { presenter, header, form, crud } from '@crud/crud'
 import rrOperation from '@crud/RR.operation'
 import crudOperation from '@crud/CRUD.operation'
 import pagination from '@crud/Pagination'
 import { loadAllContacts } from '@/api/notification/notificationContact'
 import ContactPicker from './components/ContactPicker'
+import MedialChannel from './components/MediaChannel'
+import { validEmail } from '@/utils/validate'
 
 // crud交由presenter持有
 const defaultCrud = CRUD({ title: 'alarm', url: 'alarm-api/alarmDefinition', sort: 'id,desc', crudMethod: { ...crudAlarmDefinition }})
 const defaultForm = { id: null, masterCode: null, subCode: null, alarmSubject: null, severity: null, systemType: null, alarmTemplateId: null, isEnabled: null, autoClearTime: null }
 export default {
   name: 'AlarmDefinition',
-  components: { pagination, crudOperation, rrOperation, ContactPicker },
+  components: { pagination, crudOperation, rrOperation, ContactPicker, MedialChannel },
   mixins: [presenter(defaultCrud), header(), form(defaultForm), crud()],
   dicts: ['alarm_severity', 'system_type', 'escalation_rule'],
   data() {
@@ -198,6 +220,26 @@ export default {
     }
     const validateThirdLevel = (rule, value, callback) => {
       validateHigherLevels(this.config.form.escalations[2], callback)
+    }
+    const validateMediaChannelsForAlarmTest = (rule, value, callback) => {
+      if (!value.length) {
+        callback(new Error('Please add at least one recipient'))
+      } else {
+        value.forEach(v => {
+          if (!v.mediaType) {
+            callback(new Error('Please select a media type'))
+          }
+          if (!v.mediaAddress) {
+            callback(new Error('Please input the media address'))
+          }
+          if (v.mediaType === '1' && !validEmail(v.mediaAddress)) {
+            callback(new Error('Please input a valid email'))
+          } else if (v.mediaType === '2' && !/^\d+$/.test(v.mediaAddress)) {
+            callback(new Error('Please input a valid phone number'))
+          }
+        })
+      }
+      callback()
     }
     return {
       permission: {
@@ -248,7 +290,24 @@ export default {
           { required: false, trigger: 'change', type: 'array', validator: validateThirdLevel }
         ]
       },
-      recipients: []
+      test: {
+        display: false,
+        form: {
+          alarmCode: null,
+          recipients: [],
+          messageBody: null
+        }
+      },
+      testValidationRules: {
+        messageBody: [
+          { required: true, message: 'Please input message body', trigger: 'blur' },
+          { min: 0, max: 400, message: '400 characters allowed', trigger: 'blur' }
+        ],
+        recipients: [
+          { required: true, trigger: 'change', type: 'array', validator: validateMediaChannelsForAlarmTest }
+        ]
+      },
+      recipients: [] // The full list of contacts in system, will be initialized on mount
     }
   },
   beforeUpdate() {
@@ -342,6 +401,34 @@ export default {
         this.config.display = false // Hide the config form
         this.crud.toEdit(result) // Launch the edit form
       })
+    },
+    toTest(alarmCode) {
+      this.test.display = true
+      this.test.form.alarmCode = alarmCode
+    },
+    cancelTest() {
+      this.resetTestForm()
+      this.test.display = false
+    },
+    doTest() {
+      this.$refs['testForm'].validate(valid => {
+        if (!valid) {
+          return
+        }
+        testAlarm(this.test.form).then(result => {
+          this.resetTestForm()
+          this.test.display = false
+        })
+      })
+    },
+    resetTestForm() {
+      for (var k in this.test.form) {
+        if (Array.isArray(this.test.form[k])) {
+          this.test.form[k] = []
+        } else {
+          this.test.form[k] = null
+        }
+      }
     }
   }
 }
