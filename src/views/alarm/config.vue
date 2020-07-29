@@ -93,7 +93,7 @@
           </el-form-item>
         </el-form>
         <div slot="footer" class="dialog-footer">
-          <el-button type="text">Back</el-button>
+          <el-button v-if="config.masterCode !== null && config.subCode !== null" type="text" @click="backToEdit">Back</el-button>
           <el-button type="primary" @click="doConfig">Done</el-button>
         </div>
       </el-dialog>
@@ -234,7 +234,8 @@ export default {
           alarmDefinitionId: null,
           escalations: []
         },
-        alarmCode: null
+        masterCode: null,
+        subCode: null
       },
       configValidationRules: {
         firstLevelRecipients: [
@@ -285,10 +286,11 @@ export default {
     },
     [CRUD.HOOK.beforeSubmit]() {
       // Get alarm code to config before submit
-      this.config.alarmCode = this.form.masterCode + '-' + this.form.subCode
+      this.config.masterCode = this.form.masterCode
+      this.config.subCode = this.form.subCode
     },
     [CRUD.HOOK.afterSubmit]() {
-      this.toConfig(this.config.alarmCode)
+      this.toConfig(this.config.masterCode + '-' + this.config.subCode)
     },
     initEscalations() {
       // Initialize 3 escalation levels
@@ -333,6 +335,12 @@ export default {
         }
         config(this.config.form)
         this.config.display = false
+      })
+    },
+    backToEdit() {
+      getByAlarmCode(this.config.masterCode, this.config.subCode).then(result => {
+        this.config.display = false // Hide the config form
+        this.crud.toEdit(result) // Launch the edit form
       })
     }
   }
