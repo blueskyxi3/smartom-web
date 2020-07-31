@@ -44,15 +44,31 @@
     </span>
     <ul class="contacts-list">
       <li v-for="c in escalation.contacts" :key="c.userName">
-        <el-link type="primary">{{ c.userName }}</el-link>
+        <el-link type="primary" @click="toEditContact(c)">{{ c.userName }}</el-link>
         <el-link :underline="false" @click="removeRecipient(escalation.contacts, c)"><i class="el-icon-circle-close" /></el-link>
       </li>
     </ul>
+    <el-dialog :close-on-click-modal="false" append-to-body :visible.sync="editContact.display" title="Edit Contact" width="500px">
+      <el-form ref="contactForm" :model="editContact.form" size="small" label-width="120px">
+        <el-form-item label="Username" prop="userName">
+          <el-input v-model="editContact.form.userName" type="text" disabled />
+        </el-form-item>
+        <el-form-item label="Media Channel" prop="mediaChannels">
+          <MedialChannel :recipients="editContact.form.mediaChannels" :select-only="true" />
+        </el-form-item>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button type="primary" @click="editContact.display = false">OK</el-button>
+      </div>
+    </el-dialog>
   </div>
 </template>
 <script>
+import MedialChannel from './MediaChannel'
+
 export default {
   name: 'ContactPicker',
+  components: { MedialChannel },
   dicts: ['escalation_rule'],
   props: {
     escalation: {
@@ -66,7 +82,14 @@ export default {
   },
   data() {
     return {
-      inputBuffer: '' // a buffer variable, purpose is to make the typed characters visible
+      inputBuffer: '', // a buffer variable, purpose is to make the typed characters visible
+      editContact: {
+        display: false,
+        form: {
+          userName: null,
+          mediaChannels: []
+        }
+      }
     }
   },
   beforeUpdate() {
@@ -112,6 +135,11 @@ export default {
     },
     emitChangeEvent() {
       this.$emit('change')
+    },
+    toEditContact(contact) {
+      this.editContact.display = true
+      this.editContact.form.userName = contact.userName
+      this.editContact.form.mediaChannels = contact.mediaChannels
     }
   }
 }

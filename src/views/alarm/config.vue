@@ -98,7 +98,7 @@
           <el-button type="primary" @click="doConfig">Done</el-button>
         </div>
       </el-dialog>
-      <el-dialog :close-on-click-modal="false" :visible.sync="test.display" title="Test Alarm" width="500px">
+      <el-dialog :close-on-click-modal="false" :before-close="cancelTest" :visible.sync="test.display" title="Test Alarm" width="500px">
         <el-form ref="testForm" :model="test.form" :rules="testValidationRules" size="small" label-width="120px">
           <el-form-item label="Recipients" prop="recipients">
             <MedialChannel :recipients="test.form.recipients" />
@@ -196,7 +196,17 @@ export default {
     const validateFirstLevel = (rule, value, callback) => {
       const escalation = this.config.form.escalations[0]
       if (escalation.contacts.length > 0) {
-        callback()
+        const invalidContacts = [] // Check if there're any contacts without medial channels selected
+        escalation.contacts.forEach(c => {
+          if (c.mediaChannels.filter(m => !m.disabled).length === 0) {
+            invalidContacts.push(c.userName)
+          }
+        })
+        if (invalidContacts.length === 0) {
+          callback()
+        } else {
+          callback(new Error('Please select at least one media channel for ' + invalidContacts.join()))
+        }
       } else {
         callback(new Error('Please select at least one contact'))
       }
@@ -212,7 +222,17 @@ export default {
       } else if (!escalation.escalationValue) {
         callback(new Error('Please select escalation value'))
       } else {
-        callback()
+        const invalidContacts = [] // Check if there're any contacts without medial channels selected
+        escalation.contacts.forEach(c => {
+          if (c.mediaChannels.filter(m => !m.disabled).length === 0) {
+            invalidContacts.push(c.userName)
+          }
+        })
+        if (invalidContacts.length === 0) {
+          callback()
+        } else {
+          callback(new Error('Please select at least one media channel for ' + invalidContacts.join()))
+        }
       }
     }
     const validateSecondLevel = (rule, value, callback) => {
@@ -327,7 +347,7 @@ export default {
       if (result) {
         this.recipients = result
       } else {
-        console.log('No contacts found')
+        this.crud.notify('No contacts found', 'error')
       }
     })
 
@@ -379,11 +399,28 @@ export default {
         if (result) {
           this.config.form.alarmDefinitionId = result.alarmDefinitionId
           this.initEscalations()
-          // Use Vue.set to update array item
-          result.escalations.forEach((item, index) => this.$set(this.config.form.escalations, index, item))
+          result.escalations.forEach((item, index) => {
+            item.contacts = item.contacts.map(c => {
+              const fullContact = this.recipients.find(r => r.userName === c.userName) // Find the user's full contact info
+              // Figure out which media channels are disabled
+              fullContact.mediaChannels.forEach(m => {
+                // If some media channel cannot be found in Escalation contact, it's disabled because the record was not saved into database
+                if (!c.mediaChannels.some(mc => String(mc.mediaType) === String(m.mediaType) && mc.mediaAddress === m.mediaAddress)) {
+                  c.mediaChannels.push({
+                    mediaType: m.mediaType,
+                    mediaAddress: m.mediaAddress,
+                    disabled: true
+                  })
+                }
+              })
+              return c
+            })
+            // Use Vue.set to update array item
+            this.$set(this.config.form.escalations, index, item)
+          })
           this.config.display = true
         } else {
-          console.log('No result found')
+          this.crud.notify('Could not load alarm config of: ' + alarmCode, 'error')
         }
       })
     },
@@ -392,8 +429,10 @@ export default {
         if (!valid) {
           return
         }
-        config(this.config.form)
-        this.config.display = false
+        config(this.config.form).then(() => {
+          this.config.display = false
+          this.crud.notify('Config Completed', 'success')
+        })
       })
     },
     backToEdit() {
@@ -415,9 +454,10 @@ export default {
         if (!valid) {
           return
         }
-        testAlarm(this.test.form).then(result => {
+        testAlarm(this.test.form).then(() => {
           this.resetTestForm()
           this.test.display = false
+          this.crud.notify('Testing Sent', 'success')
         })
       })
     },
