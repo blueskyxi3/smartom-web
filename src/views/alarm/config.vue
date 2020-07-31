@@ -43,6 +43,7 @@
           </el-form-item>
           <el-form-item label="Master Code" prop="masterCode">
             <el-input-number v-model="form.masterCode" controls-position="right" style="width: 100px;" />
+            <el-link type="primary" @click="generateAlarmCode(form.systemType)">Generate Alarm Code</el-link>
           </el-form-item>
           <el-form-item label="Sub-code" prop="subCode">
             <el-input-number v-model="form.subCode" controls-position="right" style="width: 100px;" />
@@ -77,7 +78,7 @@
           <el-button :loading="crud.cu === 2" type="primary" @click="crud.submitCU">Continue</el-button>
         </div>
       </el-dialog>
-      <el-dialog :close-on-click-modal="false" :visible.sync="config.display" title="Configure Alarm" width="700px">
+      <el-dialog :close-on-click-modal="false" :before-close="canceConfig" :visible.sync="config.display" title="Configure Alarm" width="700px">
         <el-form ref="configForm" :model="config.form" :rules="configValidationRules" size="small" label-width="160px">
           <el-form-item prop="alarmDefinitionId" hidden="true">
             <el-input v-model="config.form.alarmDefinitionId" type="hidden" />
@@ -94,7 +95,7 @@
         </el-form>
         <div slot="footer" class="dialog-footer">
           <el-button v-if="config.masterCode !== null && config.subCode !== null" type="text" @click="backToEdit">Back</el-button>
-          <el-button v-else type="text" @click="config.display = false">Cancel</el-button>
+          <el-button v-else type="text" @click="canceConfig">Cancel</el-button>
           <el-button type="primary" @click="doConfig">Done</el-button>
         </div>
       </el-dialog>
@@ -160,7 +161,7 @@
 </template>
 
 <script>
-import crudAlarmDefinition, { getByAlarmCode, config, loadAlarmConfig, testAlarm } from '@/api/alarm/alarmDefinition'
+import crudAlarmDefinition, { getByAlarmCode, config, loadAlarmConfig, testAlarm, autoGenerate } from '@/api/alarm/alarmDefinition'
 import CRUD, { presenter, header, form, crud } from '@crud/crud'
 import rrOperation from '@crud/RR.operation'
 import crudOperation from '@crud/CRUD.operation'
@@ -435,6 +436,11 @@ export default {
         })
       })
     },
+    canceConfig() {
+      this.config.display = false
+      this.config.masterCode = null
+      this.config.subCode = null
+    },
     backToEdit() {
       getByAlarmCode(this.config.masterCode, this.config.subCode).then(result => {
         this.config.display = false // Hide the config form
@@ -469,6 +475,21 @@ export default {
           this.test.form[k] = null
         }
       }
+    },
+    generateAlarmCode(systemType) {
+      if (!systemType) {
+        this.crud.notify('Select a system type first', 'error')
+        return
+      }
+      autoGenerate(systemType).then(result => {
+        if (/^\d+-\d+$/.test(result)) {
+          const arr = result.split('-')
+          this.form.masterCode = arr[0]
+          this.form.subCode = arr[1]
+        } else {
+          this.crud.notify('Generating error', 'error')
+        }
+      })
     }
   }
 }

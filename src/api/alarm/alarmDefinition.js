@@ -57,4 +57,11 @@ export function testAlarm(data) {
   })
 }
 
+export function autoGenerate(systemType) {
+  return request({
+    url: 'alarm-api/alarmDefinition/generateAlarmCode/' + systemType,
+    method: 'get'
+  })
+}
+
 export default { add, edit, del }
