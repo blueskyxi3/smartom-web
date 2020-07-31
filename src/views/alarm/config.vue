@@ -78,7 +78,7 @@
           <el-button :loading="crud.cu === 2" type="primary" @click="crud.submitCU">Continue</el-button>
         </div>
       </el-dialog>
-      <el-dialog :close-on-click-modal="false" :before-close="canceConfig" :visible.sync="config.display" title="Configure Alarm" width="700px">
+      <el-dialog :close-on-click-modal="false" :before-close="closeConfig" :visible.sync="config.display" title="Configure Alarm" width="700px">
         <el-form ref="configForm" :model="config.form" :rules="configValidationRules" size="small" label-width="160px">
           <el-form-item prop="alarmDefinitionId" hidden="true">
             <el-input v-model="config.form.alarmDefinitionId" type="hidden" />
@@ -95,7 +95,7 @@
         </el-form>
         <div slot="footer" class="dialog-footer">
           <el-button v-if="config.masterCode !== null && config.subCode !== null" type="text" @click="backToEdit">Back</el-button>
-          <el-button v-else type="text" @click="canceConfig">Cancel</el-button>
+          <el-button v-else type="text" @click="closeConfig">Cancel</el-button>
           <el-button type="primary" @click="doConfig">Done</el-button>
         </div>
       </el-dialog>
@@ -431,12 +431,12 @@ export default {
           return
         }
         config(this.config.form).then(() => {
-          this.config.display = false
           this.crud.notify('Config Completed', 'success')
+          this.closeConfig()
         })
       })
     },
-    canceConfig() {
+    closeConfig() {
       this.config.display = false
       this.config.masterCode = null
       this.config.subCode = null

@@ -48,7 +48,7 @@
         <el-link :underline="false" @click="removeRecipient(escalation.contacts, c)"><i class="el-icon-circle-close" /></el-link>
       </li>
     </ul>
-    <el-dialog :close-on-click-modal="false" append-to-body :before-close="cancelEditContact" :visible.sync="editContact.display" title="Edit Contact" width="500px">
+    <el-dialog :close-on-click-modal="false" append-to-body :before-close="closeEditContact" :visible.sync="editContact.display" title="Edit Contact" width="500px">
       <el-form ref="contactForm" :model="editContact.form" size="small" label-width="120px">
         <el-form-item label="Username" prop="userName">
           <el-input v-model="editContact.form.userName" type="text" disabled />
@@ -141,7 +141,7 @@ export default {
       this.editContact.form.userName = contact.userName
       this.editContact.form.mediaChannels = contact.mediaChannels
     },
-    cancelEditContact() {
+    closeEditContact() {
       this.editContact.display = false
       this.editContact.form.userName = null
       this.editContact.form.mediaChannels = []
