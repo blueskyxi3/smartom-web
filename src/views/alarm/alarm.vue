@@ -382,7 +382,7 @@ export default {
     },
     initWebSocket() {
       // const wsUri = process.env.VUE_APP_WS_API + '/webSocket/deploy'
-      const wsUri = 'ws://10.0.0.11:12345/ws'
+      const wsUri = process.env.VUE_APP_WS_ALARM_API
       this.websock = new WebSocket(wsUri)
       this.websock.onopen = this.webSocketOnOpen
       this.websock.onerror = this.webSocketOnError
