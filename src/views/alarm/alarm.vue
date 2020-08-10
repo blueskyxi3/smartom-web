@@ -18,7 +18,14 @@
             :value="item.key"
           />
         </el-select>
-        <el-select v-if="query.type == 'systemType'" v-model="query.value" clearable placeholder="Search" style="width: 200px;" class="filter-item">
+        <el-select
+          v-if="query.type == 'systemType'"
+          v-model="query.value"
+          clearable
+          placeholder="Search"
+          style="width: 200px;"
+          class="filter-item"
+        >
           <el-option
             v-for="item in dict.system_type"
             :key="item.id"
@@ -190,6 +197,16 @@
           width="80"
         />
         <el-table-column
+          prop="duration"
+          label="Duration"
+          width="180"
+          :show-overflow-tooltip="true"
+        >
+          <template slot-scope="scope">
+            <span>{{ scope.row.duration|transferDur }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column
           prop="count"
           label="Count"
           width="80"
@@ -245,6 +262,13 @@ export default {
       if (value === 3) return 'warning'
       if (value === 4) return 'info'
       return 'exeption data'
+    },
+    transferDur(value) {
+      let val = value / 60
+      val = 60 * 24 + 60 * 12
+      if (val < 60) return val.toFixed(0) + ' min(s)'
+      if (val < 60 * 24) return (val / 60).toFixed(2) + ' hour(s)'
+      else return (val / 60 / 24).toFixed(2) + ' day(s)'
     }
   },
   data() {
@@ -438,23 +462,23 @@ export default {
   margin-left: auto;
 }
 .el-table .critical-row {
-  background: #CF2A27;
+  background: #cf2a27;
   color: black;
 }
 .el-table .error-row {
-  background: #E06666;
+  background: #e06666;
   color: black;
 }
 .el-table .alert-row {
-  background: #FF9900;
+  background: #ff9900;
   color: black;
 }
 .el-table .warning-row {
-  background: #FFD966;
+  background: #ffd966;
   color: black;
 }
 .el-table .info-row {
-  background: #B6D7A8;
+  background: #b6d7a8;
   color: black;
 }
 .el-table .pending-row {
