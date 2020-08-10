@@ -194,11 +194,6 @@
         <el-table-column
           prop="duration"
           label="Duration"
-          width="80"
-        />
-        <el-table-column
-          prop="duration"
-          label="Duration"
           width="180"
           :show-overflow-tooltip="true"
         >
@@ -264,11 +259,18 @@ export default {
       return 'exeption data'
     },
     transferDur(value) {
-      let val = value / 60
-      val = 60 * 24 + 60 * 12
-      if (val < 60) return val.toFixed(0) + ' min(s)'
-      if (val < 60 * 24) return (val / 60).toFixed(2) + ' hour(s)'
-      else return (val / 60 / 24).toFixed(2) + ' day(s)'
+      const dur = Number(value)
+      if (dur < 60) {
+        return dur + 's'
+      } else if (dur < 60 * 60) {
+        return Math.floor(dur / 60) + 'm'
+      } else if (dur < 60 * 60 * 24) {
+        const mins = Math.floor(dur % 3600 / 60)
+        return Math.floor(dur / 3600) + 'h' + (mins > 0 ? (' ' + mins + 'm') : '')
+      } else {
+        const hrs = Math.floor(dur % 86400 / 3600)
+        return Math.floor(dur / 86400) + 'd' + (hrs > 0 ? (' ' + hrs + 'h') : '')
+      }
     }
   },
   data() {
