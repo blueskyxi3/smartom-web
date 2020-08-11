@@ -7,7 +7,7 @@
         <el-select v-model="query.type" clearable placeholder="Condition" class="filter-item" style="width: 130px">
           <el-option v-for="item in queryTypeOptions" :key="item.key" :label="item.display_name" :value="item.key" />
         </el-select>
-        <el-select v-if="query.type == 'severity'" v-model="query.value" clearable placeholder="Search" style="width: 200px;" class="filter-item">
+        <el-select v-if="query.type === 'severity'" v-model="query.value" clearable placeholder="Search" style="width: 200px;" class="filter-item">
           <el-option
             v-for="item in dict.alarm_severity"
             :key="item.id"
@@ -15,7 +15,7 @@
             :value="item.value"
           />
         </el-select>
-        <el-select v-else-if="query.type == 'systemType'" v-model="query.value" clearable placeholder="Search" style="width: 200px;" class="filter-item">
+        <el-select v-else-if="query.type === 'systemType'" v-model="query.value" clearable placeholder="Search" style="width: 200px;" class="filter-item">
           <el-option
             v-for="item in dict.system_type"
             :key="item.id"
