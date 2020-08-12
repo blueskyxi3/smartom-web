@@ -4,7 +4,7 @@
     <div class="head-container">
       <div v-if="crud.props.searchToggle">
         <!-- 搜索 -->
-        <el-select v-model="query.type" clearable placeholder="Condition" class="filter-item" style="width: 130px">
+        <el-select v-model="query.type" clearable placeholder="Condition" class="filter-item" style="width: 160px" @change="switchSearchCriteria">
           <el-option v-for="item in queryTypeOptions" :key="item.key" :label="item.display_name" :value="item.key" />
         </el-select>
         <el-select v-if="query.type === 'severity'" v-model="query.value" clearable placeholder="Search" style="width: 200px;" class="filter-item">
@@ -289,7 +289,9 @@ export default {
       },
       queryTypeOptions: [
         { key: 'severity', display_name: 'Severity' },
-        { key: 'systemType', display_name: 'System Type' }
+        { key: 'systemType', display_name: 'System Type' },
+        { key: 'masterCode', display_name: 'Master Code' },
+        { key: 'alarmSubject', display_name: 'Alarm Description' }
       ],
       config: {
         display: false,
@@ -490,6 +492,10 @@ export default {
           this.crud.notify('Generating error', 'error')
         }
       })
+    },
+    switchSearchCriteria() {
+      // Clean up query params
+      this.crud.params = JSON.parse('{}')
     }
   }
 }
