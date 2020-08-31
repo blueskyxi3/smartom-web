@@ -37,6 +37,20 @@ module.exports = {
         pathRewrite: {
           '^/auth': 'auth'
         }
+      },
+      '/alarm-api': {
+        target: process.env.VUE_APP_ALARM_API,
+        changeOrigin: true,
+        pathRewrite: {
+          '^/alarm-api': 'api'
+        }
+      },
+      '/notif-api': {
+        target: process.env.VUE_APP_NOTIF_API,
+        changeOrigin: true,
+        pathRewrite: {
+          '^/notif-api': 'api'
+        }
       }
     }
   },
