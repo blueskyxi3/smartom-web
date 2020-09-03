@@ -46,8 +46,8 @@ pipeline {
                         // decompress the tarball
                         sh "ssh -o StrictHostKeyChecking=no ${server} tar -xzvf ${ARTS_HOME}/smartom-web.tar.gz --directory ${ARTS_HOME}"
                         // deploy new program
-                        sh "ssh -o StrictHostKeyChecking=no ${server} rm -rf ${APP_HOME}"
-                        sh "ssh -o StrictHostKeyChecking=no ${server} mv ${ARTS_HOME}/dist ${APP_HOME}"
+                        sh "ssh -o StrictHostKeyChecking=no ${server} rm -rf ${APP_HOME}/*"
+                        sh "ssh -o StrictHostKeyChecking=no ${server} mv ${ARTS_HOME}/dist/* ${APP_HOME}/"
                     }
                 }
             }
