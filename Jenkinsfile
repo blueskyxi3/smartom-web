@@ -17,10 +17,13 @@ pipeline {
                 sh 'rm -rf dist'
                 // Run npm commands to build tarball
                 nodejs(nodeJSInstallationName: 'node11.10.1') {
-                    final profile = params.SERVER.substring(params.SERVER.indexOf('(') + 1, params.SERVER.indexOf(')'))
-                    sh 'npm i'
-                    sh 'npm run build:${profile}'
-                    sh 'tar -czf ./dist.tar.gz ./dist'
+                    script {
+                        final profile = params.SERVER.substring(params.SERVER.indexOf('(') + 1, params.SERVER.indexOf(')'))
+                        sh "npm i"
+                        sh "npm audit fix"
+                        sh "npm run build:${profile}"
+                        sh "tar -czf ./dist.tar.gz ./dist"
+                    }
                 }
             }
             post {
@@ -32,18 +35,20 @@ pipeline {
         stage('Deploy') {
             steps {
                 sshagent(credentials : ['default-app-creds']) {
-                    final server = params.SERVER.substring(0, params.SERVER.indexOf('('))
-                    // Cleanup historical artifacts
-                    sh "ssh -o StrictHostKeyChecking=no ${server} rm -f ${ARTS_HOME}/*smartom-web*.*"
+                    script {
+                        final server = params.SERVER.substring(0, params.SERVER.indexOf('('))
+                        // Cleanup historical artifacts
+                        sh "ssh -o StrictHostKeyChecking=no ${server} rm -f ${ARTS_HOME}/*smartom-web*.*"
 
-                    // upload tarball
-                    sh "scp dist.tar.gz ${server}:${ARTS_HOME}/smartom-web.tar.gz"
+                        // upload tarball
+                        sh "scp dist.tar.gz ${server}:${ARTS_HOME}/smartom-web.tar.gz"
 
-                    // decompress the tarball
-                    sh "ssh -o StrictHostKeyChecking=no ${server} tar -xzvf ${ARTS_HOME}/smartom-web.tar.gz --directory ${ARTS_HOME}"
-                    // deploy new program
-                    sh "ssh -o StrictHostKeyChecking=no ${server} rm -rf ${APP_HOME}"
-                    sh "ssh -o StrictHostKeyChecking=no ${server} mv ${ARTS_HOME}/dist ${APP_HOME}"
+                        // decompress the tarball
+                        sh "ssh -o StrictHostKeyChecking=no ${server} tar -xzvf ${ARTS_HOME}/smartom-web.tar.gz --directory ${ARTS_HOME}"
+                        // deploy new program
+                        sh "ssh -o StrictHostKeyChecking=no ${server} rm -rf ${APP_HOME}"
+                        sh "ssh -o StrictHostKeyChecking=no ${server} mv ${ARTS_HOME}/dist ${APP_HOME}"
+                    }
                 }
             }
         }
