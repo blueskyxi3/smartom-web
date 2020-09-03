@@ -48,6 +48,8 @@ pipeline {
                         // deploy new program
                         sh "ssh -o StrictHostKeyChecking=no ${server} rm -rf ${APP_HOME}/*"
                         sh "ssh -o StrictHostKeyChecking=no ${server} mv ${ARTS_HOME}/dist/* ${APP_HOME}/"
+                        // fix the 403 error after deploying
+                        sh "ssh -o StrictHostKeyChecking=no ${server} chcon -Rt httpd_sys_content_t ${APP_HOME}"
                     }
                 }
             }
