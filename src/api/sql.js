@@ -27,13 +27,21 @@ export function exec(params) {
   return request({
     url: 'api/sql/execQuery',
     method: 'get',
-    params:params
+    params: params
   })
 }
 export function get(id) {
   return request({
     url: `api/sql/${id}`,
-    method: 'get',
+    method: 'get'
   })
 }
-export default { add, edit, del,get,exec }
+export function checkAlarmDef(params) {
+  return request({
+    url: 'api/sql/checkAlarmDef',
+    method: 'get',
+    params: params
+  })
+}
+
+export default { add, edit, del, get, exec, checkAlarmDef }
