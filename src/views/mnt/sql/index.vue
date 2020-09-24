@@ -123,21 +123,14 @@
               style="width: 370px;"
             />
           </el-form-item>
-          <el-form-item label="告警编码">
-            <el-select
+          <el-form-item
+            label="告警编码"
+            prop="alertCode"
+          >
+            <el-input
               v-model="form.alertCode"
-              filterable
-              placeholder="请选择"
               style="width: 370px;"
-              clearable
-            >
-              <el-option
-                v-for="item in dict.alert_code"
-                :key="item.id"
-                :label="item.label"
-                :value="item.value"
-              />
-            </el-select>
+            />
           </el-form-item>
           <el-form-item label="备注">
             <el-input
@@ -223,14 +216,11 @@
           :show-overflow-tooltip="true"
         />
         <el-table-column
-          v-if="columns.visible('alertCode')"
+          v-if="columns.visible('rule')"
           prop="alertCode"
           label="告警编码"
-        >
-          <template slot-scope="scope">
-            {{ dict.label.alert_code[scope.row.alertCode] }}
-          </template>
-        </el-table-column>
+          :show-overflow-tooltip="true"
+        />
         <el-table-column
           v-if="columns.visible('createTime')"
           prop="createTime"
@@ -289,20 +279,50 @@ import pagination from '@crud/Pagination'
 
 // crud交由presenter持有
 const defaultCrud = CRUD({ title: 'SQL', url: 'api/sql', sort: 'id,desc', crudMethod: { ...crudSql }})
-const defaultForm = { id: null, name: null, dbId: null, sqlText: null, rule: null, createTime: null, remark: null }
+const defaultForm = { id: null, serviceName: null, alertCode: null, name: null, dbId: null, sqlText: null, rule: null, createTime: null, remark: null }
 export default {
   name: 'SqlM',
   components: { pagination, crudOperation, rrOperation, udOperation },
   mixins: [presenter(defaultCrud), header(), form(defaultForm), crud()],
   dicts: ['user_status', 'alert_code'],
   data() {
+    var checkAlertCode = (rule, value, callback) => {
+      if (!value) {
+        return callback()
+      }
+      const isCorrectFormat = /^\d{1,5}-\d{1,5}$/.test(value)
+      if (!isCorrectFormat) { return callback(new Error('告警编码格式masterCode-subCode,如100-1.')) } else {
+        // -----------------------------------------------
+        const param = { 'alertCode': this.form.alertCode }
+        if (this.crud.status.edit === 1) { Object.assign(param, { 'editCode': this.editCode }) }
+
+        console.log(JSON.stringify(param))
+        crudSql.checkAlarmDef(param).then((res) => {
+          debugger
+          if (res === 'SUCCESS') {
+            callback()
+          } else {
+            callback(new Error(res))
+          }
+        }).catch(error => {
+          console.log(error)
+          callback(new Error(error))
+        })
+        // -------------------------------------------------
+      }
+    }
+
     return {
+      loading: false,
       permission: {
         add: ['admin', 'sql:add'],
         edit: ['admin', 'sql:edit'],
         del: ['admin', 'sql:del']
       },
       rules: {
+        alertCode: [
+          { validator: checkAlertCode, trigger: 'blur' }
+        ],
         name: [
           { required: true, message: '不能为空', trigger: 'blur' }
         ],
@@ -315,7 +335,8 @@ export default {
         { key: 'sqlText', display_name: '命令' }
       ],
       query: {},
-      databases: []
+      databases: [],
+      editCode: null
     }
   },
   created() {
@@ -324,6 +345,12 @@ export default {
     })
   },
   methods: {
+    [CRUD.HOOK.beforeToEdit]() {
+      console.log('------------+------------' + this.form.alertCode)
+      this.editCode = this.form.alertCode
+      return true
+    },
+
     // 获取数据前设置好接口地址
     [CRUD.HOOK.beforeRefresh]() {
       const query = this.query

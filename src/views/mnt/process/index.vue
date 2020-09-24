@@ -107,21 +107,14 @@
               style="width: 370px;"
             />
           </el-form-item>
-          <el-form-item label="告警编码">
-            <el-select
+          <el-form-item
+            label="告警编码"
+            prop="alertCode"
+          >
+            <el-input
               v-model="form.alertCode"
-              filterable
-              placeholder="请选择"
               style="width: 370px;"
-              clearable
-            >
-              <el-option
-                v-for="item in dict.alert_code"
-                :key="item.id"
-                :label="item.label"
-                :value="item.value"
-              />
-            </el-select>
+            />
           </el-form-item>
           <el-form-item label="备注">
             <el-input
@@ -206,14 +199,11 @@
           :show-overflow-tooltip="true"
         />
         <el-table-column
-          v-if="columns.visible('alertCode')"
+          v-if="columns.visible('rule')"
           prop="alertCode"
           label="告警编码"
-        >
-          <template slot-scope="scope">
-            {{ dict.label.alert_code[scope.row.alertCode] }}
-          </template>
-        </el-table-column>
+          :show-overflow-tooltip="true"
+        />
         <el-table-column
           v-if="columns.visible('createDate')"
           prop="createDate"
@@ -264,6 +254,7 @@
 <script>
 import crudServer from '@/api/mnt/serverDeploy'
 import crudProcess from '@/api/process'
+import crudSql from '@/api/sql'
 import CRUD, { presenter, header, form, crud } from '@crud/crud'
 import rrOperation from '@crud/RR.operation'
 import crudOperation from '@crud/CRUD.operation'
@@ -272,13 +263,37 @@ import pagination from '@crud/Pagination'
 
 // crud交由presenter持有
 const defaultCrud = CRUD({ title: 'Process', url: 'api/process', sort: 'id,desc', crudMethod: { ...crudProcess }})
-const defaultForm = { id: null, serverId: null, processName: null, command: null, serviceName: null, createDate: null, updateDate: null, createUserId: null, updateUserId: null, remark: null }
+const defaultForm = { id: null, serverId: null, processName: null, command: null, serviceName: null, createDate: null, updateDate: null, alertCode: null, createUserId: null, updateUserId: null, remark: null }
 export default {
   name: 'Process',
   components: { pagination, crudOperation, rrOperation, udOperation },
   mixins: [presenter(defaultCrud), header(), form(defaultForm), crud()],
   dicts: ['alert_code'],
   data() {
+    var checkAlertCode = (rule, value, callback) => {
+      if (!value) {
+        return callback()
+      }
+      const isCorrectFormat = /^\d{1,5}-\d{1,5}$/.test(value)
+      if (!isCorrectFormat) { return callback(new Error('告警编码格式masterCode-subCode,如100-1.')) } else {
+        // -----------------------------------------------
+        const param = { 'alertCode': this.form.alertCode }
+        if (this.crud.status.edit === 1) { Object.assign(param, { 'editCode': this.editCode }) }
+
+        console.log(JSON.stringify(param))
+        crudSql.checkAlarmDef(param).then((res) => {
+          if (res === 'SUCCESS') {
+            callback()
+          } else {
+            callback(new Error(res))
+          }
+        }).catch(error => {
+          console.log(error)
+          callback(new Error(error))
+        })
+        // -------------------------------------------------
+      }
+    }
     return {
       permission: {
         add: ['admin', 'process:add'],
@@ -286,6 +301,9 @@ export default {
         del: ['admin', 'process:del']
       },
       rules: {
+        alertCode: [
+          { validator: checkAlertCode, trigger: 'blur' }
+        ],
         processName: [
           { required: true, message: '不能为空', trigger: 'blur' }
         ],
@@ -302,7 +320,8 @@ export default {
         { key: 'command', display_name: 'command' },
         { key: 'serviceName', display_name: 'serviceName' }
       ],
-      servers: []
+      servers: [],
+      editCode: null
     }
   },
   created() {
@@ -311,6 +330,11 @@ export default {
     })
   },
   methods: {
+    [CRUD.HOOK.beforeToEdit]() {
+      console.log('------------+------------' + this.form.alertCode)
+      this.editCode = this.form.alertCode
+      return true
+    },
     // 获取数据前设置好接口地址
     [CRUD.HOOK.beforeRefresh]() {
       this.crud.params = {}
