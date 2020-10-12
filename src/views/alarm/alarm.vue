@@ -457,11 +457,21 @@ export default {
 }
 .el-table .critical-row {
   background: #cf2a27;
-  color: black;
+  color: white;
+}
+.el-table .critical-row:hover>td {
+  box-shadow: 0px 1px 8px #a01d1a;
+  background: #cf2a27 !important;
+  color: #dcdfe6 !important;
 }
 .el-table .error-row {
   background: #e06666;
   color: black;
+}
+.el-table .error-row:hover>td {
+  box-shadow: 0px 1px 8px #cf2a27;
+  background: #e06666 !important;
+  color: black !important;
 }
 .el-table .alert-row {
   color: black;
