@@ -151,34 +151,34 @@
         style="width: 100%"
         :row-class-name="tableRowClassName"
       >
-        <el-table-column
+        <!-- <el-table-column
           prop="id"
           label="ID"
           width="80"
-        />
+        /> -->
         <el-table-column
           prop="alarmSubject"
           label="Alarm Description"
-          width="180"
+          width="300"
         />
         <el-table-column
           prop="systemTypeDesc"
           label="System Type"
-          width="180"
+          width="100"
         />
         <el-table-column
           prop="alarmCode"
           label="Alarm Code"
-          width="180"
+          width="100"
         />
         <el-table-column
           prop="severity"
           label="Severity"
-          width="180"
+          width="100"
           :show-overflow-tooltip="true"
         >
           <template slot-scope="scope">
-            <span>{{ scope.row.severity|transfer }}</span>
+            {{ dict.label.alarm_severity[scope.row.severity] }}
           </template>
         </el-table-column>
         <el-table-column
@@ -194,7 +194,7 @@
         <el-table-column
           prop="duration"
           label="Duration"
-          width="180"
+          width="100"
           :show-overflow-tooltip="true"
         >
           <template slot-scope="scope">
@@ -208,7 +208,7 @@
         />
         <el-table-column
           prop="createdBy"
-          label="Created By"
+          label="Alarm Source"
         />
         <el-table-column
           prop="updatedBy"
@@ -245,18 +245,10 @@ const MainColor = [
 export default {
   name: 'AlarmPanel',
   components: { udOperation },
-  dicts: ['system_type'],
+  dicts: ['alarm_severity', 'system_type'],
   filters: {
     parseTime(value) {
       return parseTime(value)
-    },
-    transfer(value) {
-      if (value === 0) return 'critical'
-      if (value === 1) return 'error'
-      if (value === 2) return 'alert'
-      if (value === 3) return 'warning'
-      if (value === 4) return 'info'
-      return 'exeption data'
     },
     transferDur(value) {
       const dur = Number(value)
@@ -472,16 +464,22 @@ export default {
   color: black;
 }
 .el-table .alert-row {
-  background: #ff9900;
   color: black;
+}
+.el-table .alert-row:hover>td {
+  background: #ff9900 !important;
 }
 .el-table .warning-row {
-  background: #ffd966;
   color: black;
 }
+.el-table .warning-row:hover>td {
+  background: #ffd966 !important;
+}
 .el-table .info-row {
-  background: #b6d7a8;
   color: black;
+}
+.el-table .info-row:hover>td {
+  background: #b6d7a8 !important;
 }
 .el-table .pending-row {
   color: #6c757d;

@@ -129,34 +129,38 @@
         style="width: 100%"
         :row-class-name="tableRowClassName"
       >
-        <el-table-column
+        <!-- <el-table-column
           prop="id"
           label="ID"
           width="80"
-        />
+        /> -->
         <el-table-column
           prop="alarm_subject"
           label="Alarm Description"
-          width="180"
+          width="300"
         />
         <el-table-column
-          prop="system_type_desc"
+          prop="system_type"
           label="System Type"
-          width="180"
-        />
+          width="100"
+        >
+          <template slot-scope="scope">
+            {{ dict.label.system_type[scope.row.system_type] }}
+          </template>
+        </el-table-column>
         <el-table-column
           prop="alarm_code"
           label="Alarm Code"
-          width="180"
+          width="100"
         />
         <el-table-column
           prop="severity"
           label="Severity"
-          width="180"
+          width="100"
           :show-overflow-tooltip="true"
         >
           <template slot-scope="scope">
-            <span>{{ scope.row.severity|transfer }}</span>
+            {{ dict.label.alarm_severity[scope.row.severity] }}
           </template>
         </el-table-column>
         <el-table-column
@@ -219,16 +223,9 @@ export default {
   filters: {
     parseTime(value) {
       return parseTime(value)
-    },
-    transfer(value) {
-      if (value === 0) return 'critical'
-      if (value === 1) return 'error'
-      if (value === 2) return 'alert'
-      if (value === 3) return 'warning'
-      if (value === 4) return 'info'
-      return 'exeption data'
     }
   },
+  dicts: ['alarm_severity', 'system_type'],
   data() {
     return {
       page: { size: 10, total: 0, page: 1 },
