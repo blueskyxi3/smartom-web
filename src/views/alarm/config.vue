@@ -62,7 +62,11 @@
             </el-select>
           </el-form-item>
           <el-form-item label="Status" prop="isEnabled">
-            <el-checkbox v-model="form.isEnabled">Enable/Disable</el-checkbox>
+            <el-switch
+              v-model="form.isEnabled"
+              active-color="#13ce66"
+              inactive-color="#ff4949"
+            />
           </el-form-item>
           <el-form-item label="Auto-clear after" prop="autoClearTime">
             <el-input v-model="form.autoClearTime" style="width: 60px;" />&nbsp; minutes
@@ -131,8 +135,12 @@
         <el-table-column v-if="columns.visible('alarmSubject')" prop="alarmSubject" label="Subject" />
         <el-table-column v-if="columns.visible('isEnabled')" prop="isEnabled" label="Status">
           <template slot-scope="scope">
-            <span v-if="scope.row.isEnabled">Enabled</span>
-            <span v-else>Disabled</span>
+            <el-switch
+              v-model="scope.row.isEnabled"
+              active-color="#13ce66"
+              inactive-color="#ff4949"
+              disabled="true"
+            />
           </template>
         </el-table-column>
         <el-table-column v-permission="['admin','alarmDefinition:config','alarmDefinition:test']" label="Actions" width="250px" align="center">
