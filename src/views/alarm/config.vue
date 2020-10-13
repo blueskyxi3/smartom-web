@@ -69,11 +69,11 @@
             />
           </el-form-item>
           <el-form-item label="Auto-clear after" prop="autoClearTime">
-            <el-input v-model="form.autoClearTime" style="width: 60px;" />&nbsp; minutes
+            <el-input v-model="form.autoClearTime" style="width: 80px;" />&nbsp; minutes
           </el-form-item>
           <el-form-item label="Template" prop="alarmTemplateId">
-            <el-select v-model="form.alarmTemplateId" style="width: 224px;" disabled>
-              <el-option label="Default Alarm Template" value="1" />
+            <el-select v-model="form.alarmTemplateId" placeholder="Please select" style="width: 224px;">
+              <el-option v-for="item in templates" :key="item.id" :label="item.templateName" :value="item.id" />
             </el-select>
           </el-form-item>
         </el-form>
@@ -200,6 +200,7 @@ import ContactPicker from './components/ContactPicker'
 import MedialChannel from './components/MediaChannel'
 import guideline from './panel/guideline.vue'
 import { validEmail } from '@/utils/validate'
+import { listAllTemplates } from '@/api/alarm/alarmMessageTemplate'
 
 // crud交由presenter持有
 const defaultCrud = CRUD({ title: 'alarm', url: 'alarm-api/alarmDefinition', sort: 'id,desc', crudMethod: { ...crudAlarmDefinition }})
@@ -315,6 +316,9 @@ export default {
         ],
         severity: [
           { required: true, message: 'Please set the severity', trigger: 'blur' }
+        ],
+        alarmTemplateId: [
+          { required: true, message: 'Please select the template', trigger: 'blur' }
         ]
       },
       queryTypeOptions: [
@@ -366,7 +370,8 @@ export default {
         data: {
           alarmDefinitionId: 0
         }
-      }
+      },
+      templates: []
     }
   },
   beforeUpdate() {
@@ -377,8 +382,6 @@ export default {
     if (s !== null) this.form.severity = String(s)
     // When creating a new alarm, the 'isEnabled' property should be true
     if (this.form.id === null) this.form.isEnabled = true
-    // Default template id
-    this.form.alarmTemplateId = String(1)
   },
   mounted() {
     // load full list of contacts in system
@@ -392,6 +395,14 @@ export default {
 
     // initialize escalations
     this.initEscalations()
+
+    listAllTemplates().then(result => {
+      if (result && result.totalElements) {
+        this.templates = result.content
+      } else {
+        this.crud.notify('No alarm templates found', 'error')
+      }
+    })
   },
   methods: {
     // 获取数据前设置好接口地址
