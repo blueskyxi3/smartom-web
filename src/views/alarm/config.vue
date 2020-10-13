@@ -132,18 +132,18 @@
             {{ dict.label.alarm_severity[scope.row.severity] }}
           </template>
         </el-table-column>
-        <el-table-column v-if="columns.visible('alarmSubject')" prop="alarmSubject" label="Subject" />
-        <el-table-column v-if="columns.visible('isEnabled')" prop="isEnabled" label="Status">
+        <el-table-column v-if="columns.visible('alarmSubject')" prop="alarmSubject" label="Subject" width="300px" />
+        <el-table-column v-if="columns.visible('isEnabled')" prop="isEnabled" label="Status" width="100px">
           <template slot-scope="scope">
             <el-switch
               v-model="scope.row.isEnabled"
               active-color="#13ce66"
               inactive-color="#ff4949"
-              disabled="true"
+              disabled
             />
           </template>
         </el-table-column>
-        <el-table-column v-permission="['admin','alarmDefinition:config','alarmDefinition:test']" label="Actions" width="250px" align="center">
+        <el-table-column v-permission="['admin','alarmDefinition:config','alarmDefinition:test']" label="Actions" width="300px" align="center">
           <template slot-scope="scope">
             <el-button
               icon="el-icon-setting"
@@ -151,6 +151,13 @@
               @click="toConfig(scope.row.masterCode + '-' + scope.row.subCode)"
             >
               Config
+            </el-button>
+            <el-button
+              icon="el-icon-document"
+              size="mini"
+              @click="toInputGuideline(scope.row.id)"
+            >
+              Guideline
             </el-button>
             <el-button
               icon="el-icon-message"
@@ -162,6 +169,20 @@
           </template>
         </el-table-column>
       </el-table>
+      <el-dialog
+        :close-on-click-modal="false"
+        :before-close="cancelGuideline"
+        :visible.sync="guideline.display"
+        title="Alarm Guideline"
+        width="815px"
+        @open="initGuideline()"
+      >
+        <guideline
+          ref="guidelineInput"
+          :data="guideline.data"
+          @event_guide="cancelGuideline"
+        />
+      </el-dialog>
       <!--分页组件-->
       <pagination />
     </div>
@@ -177,6 +198,7 @@ import pagination from '@crud/Pagination'
 import { loadAllContacts } from '@/api/notification/notificationContact'
 import ContactPicker from './components/ContactPicker'
 import MedialChannel from './components/MediaChannel'
+import guideline from './panel/guideline.vue'
 import { validEmail } from '@/utils/validate'
 
 // crud交由presenter持有
@@ -184,7 +206,7 @@ const defaultCrud = CRUD({ title: 'alarm', url: 'alarm-api/alarmDefinition', sor
 const defaultForm = { id: null, masterCode: null, subCode: null, alarmSubject: null, severity: null, systemType: null, alarmTemplateId: null, isEnabled: null, autoClearTime: null }
 export default {
   name: 'AlarmDefinition',
-  components: { pagination, crudOperation, rrOperation, ContactPicker, MedialChannel },
+  components: { pagination, crudOperation, rrOperation, ContactPicker, MedialChannel, guideline },
   mixins: [presenter(defaultCrud), header(), form(defaultForm), crud()],
   dicts: ['alarm_severity', 'system_type', 'escalation_rule'],
   data() {
@@ -338,7 +360,13 @@ export default {
           { required: true, trigger: 'change', type: 'array', validator: validateMediaChannelsForAlarmTest }
         ]
       },
-      recipients: [] // The full list of contacts in system, will be initialized on mount
+      recipients: [], // The full list of contacts in system, will be initialized on mount
+      guideline: {
+        display: false,
+        data: {
+          alarmDefinitionId: 0
+        }
+      }
     }
   },
   beforeUpdate() {
@@ -504,6 +532,22 @@ export default {
     switchSearchCriteria() {
       // Clean up query params
       this.crud.params = JSON.parse('{}')
+    },
+    initGuideline() {
+      // a known issue of components in el-dialog. this.$refs.key would return "undefined".
+      // so we have to access it in this.$nextTick()
+      this.$nextTick(() => {
+        this.$refs.guidelineInput.getAlarmGuide()
+      })
+    },
+    toInputGuideline(id) {
+      this.guideline.display = true
+      this.guideline.data.alarmDefinitionId = id
+    },
+    cancelGuideline() {
+      this.guideline.display = false
+      this.guideline.data.alarmDefinitionId = 0
+      this.$refs.guidelineInput.resetContent()
     }
   }
 }

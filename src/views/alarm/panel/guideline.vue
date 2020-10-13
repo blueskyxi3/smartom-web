@@ -98,6 +98,9 @@ export default {
         this.$message.error('Error occured')
         this.$emit('event_guide', true)
       })
+    },
+    resetContent() {
+      this.editor.txt.clear()
     }
   }
 }
