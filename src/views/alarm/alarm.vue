@@ -473,25 +473,23 @@ export default {
   background: #e06666 !important;
   color: black !important;
 }
-.el-table .alert-row {
-  color: black;
-}
 .el-table .alert-row:hover>td {
   background: #ff9900 !important;
-}
-.el-table .warning-row {
   color: black;
 }
 .el-table .warning-row:hover>td {
   background: #ffd966 !important;
-}
-.el-table .info-row {
   color: black;
 }
 .el-table .info-row:hover>td {
   background: #b6d7a8 !important;
+  color: black;
 }
 .el-table .pending-row {
-  color: #6c757d;
+  background: #a3a3a3 !important;
+  color: white;
+}
+.el-table .pending-row:hover>td {
+  color: #313131;
 }
 </style>
