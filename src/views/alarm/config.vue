@@ -62,14 +62,18 @@
             </el-select>
           </el-form-item>
           <el-form-item label="Status" prop="isEnabled">
-            <el-checkbox v-model="form.isEnabled">Enable/Disable</el-checkbox>
+            <el-switch
+              v-model="form.isEnabled"
+              active-color="#13ce66"
+              inactive-color="#ff4949"
+            />
           </el-form-item>
           <el-form-item label="Auto-clear after" prop="autoClearTime">
-            <el-input v-model="form.autoClearTime" style="width: 60px;" />&nbsp; minutes
+            <el-input v-model="form.autoClearTime" style="width: 80px;" />&nbsp; minutes
           </el-form-item>
           <el-form-item label="Template" prop="alarmTemplateId">
-            <el-select v-model="form.alarmTemplateId" style="width: 224px;" disabled>
-              <el-option label="Default Alarm Template" value="1" />
+            <el-select v-model="form.alarmTemplateId" placeholder="Please select" style="width: 224px;">
+              <el-option v-for="item in templates" :key="item.id" :label="item.templateName" :value="item.id" />
             </el-select>
           </el-form-item>
         </el-form>
@@ -128,14 +132,18 @@
             {{ dict.label.alarm_severity[scope.row.severity] }}
           </template>
         </el-table-column>
-        <el-table-column v-if="columns.visible('alarmSubject')" prop="alarmSubject" label="Subject" />
-        <el-table-column v-if="columns.visible('isEnabled')" prop="isEnabled" label="Status">
+        <el-table-column v-if="columns.visible('alarmSubject')" prop="alarmSubject" label="Subject" width="300px" />
+        <el-table-column v-if="columns.visible('isEnabled')" prop="isEnabled" label="Status" width="100px">
           <template slot-scope="scope">
-            <span v-if="scope.row.isEnabled">Enabled</span>
-            <span v-else>Disabled</span>
+            <el-switch
+              v-model="scope.row.isEnabled"
+              active-color="#13ce66"
+              inactive-color="#ff4949"
+              disabled
+            />
           </template>
         </el-table-column>
-        <el-table-column v-permission="['admin','alarmDefinition:config','alarmDefinition:test']" label="Actions" width="250px" align="center">
+        <el-table-column v-permission="['admin','alarmDefinition:config','alarmDefinition:test']" label="Actions" width="300px" align="center">
           <template slot-scope="scope">
             <el-button
               icon="el-icon-setting"
@@ -143,6 +151,13 @@
               @click="toConfig(scope.row.masterCode + '-' + scope.row.subCode)"
             >
               Config
+            </el-button>
+            <el-button
+              icon="el-icon-document"
+              size="mini"
+              @click="toInputGuideline(scope.row.id)"
+            >
+              Guideline
             </el-button>
             <el-button
               icon="el-icon-message"
@@ -154,6 +169,20 @@
           </template>
         </el-table-column>
       </el-table>
+      <el-dialog
+        :close-on-click-modal="false"
+        :before-close="cancelGuideline"
+        :visible.sync="guideline.display"
+        title="Alarm Guideline"
+        width="815px"
+        @open="initGuideline()"
+      >
+        <guideline
+          ref="guidelineInput"
+          :data="guideline.data"
+          @event_guide="cancelGuideline"
+        />
+      </el-dialog>
       <!--分页组件-->
       <pagination />
     </div>
@@ -169,14 +198,16 @@ import pagination from '@crud/Pagination'
 import { loadAllContacts } from '@/api/notification/notificationContact'
 import ContactPicker from './components/ContactPicker'
 import MedialChannel from './components/MediaChannel'
+import guideline from './panel/guideline.vue'
 import { validEmail } from '@/utils/validate'
+import { listAllTemplates } from '@/api/alarm/alarmMessageTemplate'
 
 // crud交由presenter持有
 const defaultCrud = CRUD({ title: 'alarm', url: 'alarm-api/alarmDefinition', sort: 'id,desc', crudMethod: { ...crudAlarmDefinition }})
 const defaultForm = { id: null, masterCode: null, subCode: null, alarmSubject: null, severity: null, systemType: null, alarmTemplateId: null, isEnabled: null, autoClearTime: null }
 export default {
   name: 'AlarmDefinition',
-  components: { pagination, crudOperation, rrOperation, ContactPicker, MedialChannel },
+  components: { pagination, crudOperation, rrOperation, ContactPicker, MedialChannel, guideline },
   mixins: [presenter(defaultCrud), header(), form(defaultForm), crud()],
   dicts: ['alarm_severity', 'system_type', 'escalation_rule'],
   data() {
@@ -285,6 +316,9 @@ export default {
         ],
         severity: [
           { required: true, message: 'Please set the severity', trigger: 'blur' }
+        ],
+        alarmTemplateId: [
+          { required: true, message: 'Please select the template', trigger: 'blur' }
         ]
       },
       queryTypeOptions: [
@@ -330,7 +364,14 @@ export default {
           { required: true, trigger: 'change', type: 'array', validator: validateMediaChannelsForAlarmTest }
         ]
       },
-      recipients: [] // The full list of contacts in system, will be initialized on mount
+      recipients: [], // The full list of contacts in system, will be initialized on mount
+      guideline: {
+        display: false,
+        data: {
+          alarmDefinitionId: 0
+        }
+      },
+      templates: []
     }
   },
   beforeUpdate() {
@@ -341,8 +382,6 @@ export default {
     if (s !== null) this.form.severity = String(s)
     // When creating a new alarm, the 'isEnabled' property should be true
     if (this.form.id === null) this.form.isEnabled = true
-    // Default template id
-    this.form.alarmTemplateId = String(1)
   },
   mounted() {
     // load full list of contacts in system
@@ -356,6 +395,14 @@ export default {
 
     // initialize escalations
     this.initEscalations()
+
+    listAllTemplates().then(result => {
+      if (result && result.totalElements) {
+        this.templates = result.content
+      } else {
+        this.crud.notify('No alarm templates found', 'error')
+      }
+    })
   },
   methods: {
     // 获取数据前设置好接口地址
@@ -496,6 +543,22 @@ export default {
     switchSearchCriteria() {
       // Clean up query params
       this.crud.params = JSON.parse('{}')
+    },
+    initGuideline() {
+      // a known issue of components in el-dialog. this.$refs.key would return "undefined".
+      // so we have to access it in this.$nextTick()
+      this.$nextTick(() => {
+        this.$refs.guidelineInput.getAlarmGuide()
+      })
+    },
+    toInputGuideline(id) {
+      this.guideline.display = true
+      this.guideline.data.alarmDefinitionId = id
+    },
+    cancelGuideline() {
+      this.guideline.display = false
+      this.guideline.data.alarmDefinitionId = 0
+      this.$refs.guidelineInput.resetContent()
     }
   }
 }
