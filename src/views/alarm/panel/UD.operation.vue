@@ -15,7 +15,7 @@
       />
       <el-button
         slot="reference"
-        :disabled="disabledDle"
+        :disabled="disabledEdit"
         type="primary"
         icon="el-icon-edit-outline"
         size="mini"
@@ -134,6 +134,7 @@ export default {
       if (data.status === 2) {
         resume(data.alarmCode).then((res) => {
           console.log(JSON.stringify(res))
+          this.disabledDle = false
           this.$message.success('Alarm resumed')
           this.$emit('event_refresh', true)
         }).catch((e) => {
@@ -143,6 +144,7 @@ export default {
       } else {
         pause(data.alarmCode).then((res) => {
           console.log(JSON.stringify(res))
+          this.disabledDle = true
           this.$message.success('Alarm suspended')
           this.$emit('event_refresh', true)
         }).catch((e) => {

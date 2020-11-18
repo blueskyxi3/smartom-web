@@ -225,6 +225,7 @@
           <template slot-scope="scope">
             <udOperation
               :data="scope.row"
+              :disabled-dle="scope.row.status === 2"
               @event_refresh="$_search"
             />
           </template>
