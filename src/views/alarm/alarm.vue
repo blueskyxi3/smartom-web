@@ -160,6 +160,7 @@
           prop="alarmSubject"
           label="Alarm Description"
           width="300"
+          :show-overflow-tooltip="true"
         />
         <el-table-column
           prop="systemTypeDesc"
@@ -209,10 +210,12 @@
         <el-table-column
           prop="createdBy"
           label="Alarm Source"
+          :show-overflow-tooltip="true"
         />
         <el-table-column
           prop="updatedBy"
           label="Updated By"
+          :show-overflow-tooltip="true"
         />
         <el-table-column
           label="Actions"
@@ -222,6 +225,7 @@
           <template slot-scope="scope">
             <udOperation
               :data="scope.row"
+              :disabled-dle="scope.row.status === 2"
               @event_refresh="$_search"
             />
           </template>
