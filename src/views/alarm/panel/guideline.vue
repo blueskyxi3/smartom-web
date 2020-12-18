@@ -18,17 +18,26 @@
         type="primary"
         @click="doSubmit"
       >Save</el-button>
+      <label v-if="form.lastUpdatedBy && form.lastUpdatedTime">
+        Last updated by {{ form.lastUpdatedBy }} at {{ form.lastUpdatedTime|parseTime }}
+      </label>
     </el-form>
   </div>
 </template>
 
 <script>
 import { upload } from '@/utils/upload'
+import { parseTime } from '@/utils/index'
 import { mapGetters } from 'vuex'
 import E from 'wangeditor'
 import { addGuide, getGuide } from '@/api/alarm/alarmRecord'
 export default {
   name: 'Index',
+  filters: {
+    parseTime(value) {
+      return parseTime(value)
+    }
+  },
   props: {
     data: {
       type: Object,
@@ -37,7 +46,12 @@ export default {
   },
   data() {
     return {
-      loading: false, form: { content: '' },
+      loading: false,
+      form: {
+        content: '',
+        lastUpdatedBy: '',
+        lastUpdatedTime: ''
+      },
       editor: null
     }
   },
@@ -75,6 +89,8 @@ export default {
         console.log(JSON.stringify(res))
         this.editor.txt.html(res.guideline)
         this.loading = false
+        this.form.lastUpdatedBy = res.lastUpdatedBy
+        this.form.lastUpdatedTime = res.lastUpdatedTime
       }).catch(err => {
         this.loading = false
         console.log(err.response.data.message)
