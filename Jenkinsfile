@@ -20,7 +20,7 @@ pipeline {
                     script {
                         final profile = params.SERVER.substring(params.SERVER.indexOf('(') + 1, params.SERVER.indexOf(')'))
                         sh "npm i"
-                        sh "npm audit fix"
+                        // sh "npm audit fix"
                         sh "npm run build:${profile}"
                         sh "tar -czf ./dist.tar.gz ./dist"
                     }
