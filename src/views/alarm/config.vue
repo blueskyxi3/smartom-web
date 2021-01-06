@@ -381,7 +381,9 @@ export default {
     if (t !== null) this.form.systemType = String(t)
     if (s !== null) this.form.severity = String(s)
     // When creating a new alarm, the 'isEnabled' property should be true
-    if (this.form.id === null) this.form.isEnabled = true
+    if (this.form.isEnabled === null) this.form.isEnabled = true
+    // When creating a new alarm, the 'autoClearTime' is default to 7 days
+    if (this.form.autoClearTime === null) this.form.autoClearTime = 10080
   },
   mounted() {
     // load full list of contacts in system
