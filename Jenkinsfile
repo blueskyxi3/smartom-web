@@ -16,7 +16,7 @@ pipeline {
                 sh 'rm -f dist.tar.gz'
                 sh 'rm -rf dist'
                 // Run npm commands to build tarball
-                nodejs(nodeJSInstallationName: 'node11.10.1') {
+                nodejs(nodeJSInstallationName: 'node13.12.0') {
                     script {
                         final profile = params.SERVER.substring(params.SERVER.indexOf('(') + 1, params.SERVER.indexOf(')'))
                         sh "npm i"

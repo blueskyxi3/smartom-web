@@ -41,9 +41,10 @@ export default {
     const _this = this
     var editor = new E(this.$refs.editor)
     // 自定义菜单配置
-    editor.customConfig.zIndex = 10
+    const editorConfig = editor.customConfig !== undefined ? editor.customConfig : editor.config
+    editorConfig.zIndex = 10
     // 文件上传
-    editor.customConfig.customUploadImg = function(files, insert) {
+    editorConfig.customUploadImg = function(files, insert) {
       // files 是 input 中选中的文件列表
       // insert 是获取图片 url 后，插入到编辑器的方法
       files.forEach(image => {
@@ -52,7 +53,7 @@ export default {
         })
       })
     }
-    editor.customConfig.onchange = (html) => {
+    editorConfig.onchange = (html) => {
       this.editorContent = html
     }
     editor.create()

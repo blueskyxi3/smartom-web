@@ -100,6 +100,12 @@ export default {
       ]
     }
   },
+  created() {
+    const monitorId = this.$route.params.monitorId
+    // alert(monitorId)
+    this.query = { type: 'monitorId', value: monitorId }
+    // this.crud.toQuery()
+  },
   methods: {
     // 获取数据前设置好接口地址
     [CRUD.HOOK.beforeRefresh]() {
@@ -111,12 +117,6 @@ export default {
       }
       return true
     }
-  },
-  created() {
-     let monitorId = this.$route.params.monitorId
-   // alert(monitorId)
-     this.query = {type:'monitorId',value:monitorId}
-   //  this.crud.toQuery()
   }
 }
 </script>
