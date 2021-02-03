@@ -322,6 +322,7 @@ export default {
         ]
       },
       queryTypeOptions: [
+        { key: 'alarmCode', display_name: 'Alarm Code' },
         { key: 'severity', display_name: 'Severity' },
         { key: 'systemType', display_name: 'System Type' },
         { key: 'masterCode', display_name: 'Master Code' },
@@ -410,7 +411,11 @@ export default {
     // 获取数据前设置好接口地址
     [CRUD.HOOK.beforeRefresh]() {
       const query = this.query
-      if (query.type && query.value) {
+      if (query.type === 'alarmCode' && query.value) {
+        const arr = query.value.split('-')
+        this.crud.params['masterCode'] = arr[0]
+        this.crud.params['subCode'] = arr[1]
+      } else if (query.type && query.value) {
         this.crud.params[query.type] = query.value
       }
       return true
