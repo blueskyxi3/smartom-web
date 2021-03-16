@@ -1,7 +1,7 @@
 <template>
   <div v-if="selectOnly">
     <span v-for="(r, index) in recipients" :key="`r-${index}`" class="media-channel select-only">
-      <el-select v-model="r.mediaType" clearable placeholder="select" style="width: 80px;" disabled>
+      <el-select v-model="r.mediaType" clearable placeholder="select" style="width: 110px;" disabled>
         <el-option
           v-for="item in dict.media_type"
           :key="item.id"
