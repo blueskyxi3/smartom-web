@@ -2,11 +2,9 @@
   <div class="sidebar-logo-container" :class="{'collapse':collapse}">
     <transition name="sidebarLogoFade">
       <router-link v-if="collapse" key="collapse" class="sidebar-logo-link" to="/">
-        <img v-if="logo" :src="logo" class="sidebar-logo">
-        <h1 v-else class="sidebar-title">{{ title }} </h1>
+        <img v-if="logo" :src="logosmall" class="sidebar-logo">
       </router-link>
       <router-link v-else key="expand" class="sidebar-logo-link" to="/">
-        <h1 class="sidebar-title">{{ title }} </h1>
         <img v-if="logo" :src="logo" class="sidebar-logo">
       </router-link>
     </transition>
@@ -15,6 +13,7 @@
 
 <script>
 import Logo from '@/assets/images/logo.png'
+import LogoSmall from '@/assets/images/logo-collapsed.png'
 export default {
   name: 'SidebarLogo',
   props: {
@@ -25,8 +24,9 @@ export default {
   },
   data() {
     return {
-      title: 'Smart',
-      logo: Logo
+      title: 'SmartOM',
+      logo: Logo,
+      logosmall: LogoSmall
     }
   }
 }
@@ -55,8 +55,8 @@ export default {
     width: 100%;
 
     & .sidebar-logo {
-      width: 56px;
-      height: 40px;
+      width: 180px;
+      height: 30px;
       vertical-align: middle;
       margin-right: 6px;
       margin-left: 6px;
@@ -77,6 +77,9 @@ export default {
   &.collapse {
     .sidebar-logo {
       margin-right: 0px;
+      margin-left: 0px;
+      width: 50px;
+      height: 20px;
     }
   }
 }
