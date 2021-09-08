@@ -40,7 +40,7 @@ export const constantRouterMap = [
         path: 'dashboard',
         component: () => import('@/views/home'),
         name: 'Dashboard',
-        meta: { title: '首页', icon: 'index', affix: true, noCache: true }
+        meta: { title: 'Home', icon: 'index', affix: true, noCache: true }
       }
     ]
   },
@@ -61,8 +61,8 @@ export const constantRouterMap = [
 ]
 
 export default new Router({
- // mode: 'history',
- // hash:true,
+  // mode: 'history',
+  // hash:true,
   scrollBehavior: () => ({ y: 0 }),
   routes: constantRouterMap
 })
