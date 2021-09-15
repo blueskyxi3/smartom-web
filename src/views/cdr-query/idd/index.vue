@@ -291,6 +291,9 @@ export default {
   },
   methods: {
     toQuery() {
+      if (this.queryLoading) {
+        return
+      }
       this.queryLoading = true
       // Format the times to "yyyy-mm-dd hh:mi:ss"
       var queryObjClone = Object.assign({}, this.queryObject)
@@ -329,9 +332,15 @@ export default {
               if ('IN_UA_ID' in x) {
                 x = this.renameObjKey(x, 'IN_UA_ID', 'Customer')
                 x.Customer = this.uaIdToBillCode(x.Customer, this.customerList)
+              } else if ('in_ua_id' in x) {
+                x = this.renameObjKey(x, 'in_ua_id', 'Customer')
+                x.Customer = this.uaIdToBillCode(x.Customer, this.customerList)
               }
               if ('OUT_UA_ID' in x) {
                 x = this.renameObjKey(x, 'OUT_UA_ID', 'Carrier')
+                x.Carrier = this.uaIdToBillCode(x.Carrier, this.carrierList)
+              } else if ('out_ua_id' in x) {
+                x = this.renameObjKey(x, 'out_ua_id', 'Carrier')
                 x.Carrier = this.uaIdToBillCode(x.Carrier, this.carrierList)
               }
               return x
