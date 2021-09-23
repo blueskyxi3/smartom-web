@@ -354,11 +354,7 @@ export default {
         // Do query when analysis is off
         doQuery(queryObjClone).then(result => {
           if (result) {
-            if (result.length > 50000) {
-              this.queryResult.tableData = result.slice(0, 50000)
-            } else {
-              this.queryResult.tableData = result
-            }
+            this.queryResult.tableData = result
             this.queryResult.total = this.queryResult.tableData.length
             this.queryResult.curPage = 1 // reset current page
             // Massage the query result
